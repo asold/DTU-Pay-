@@ -7,6 +7,7 @@ import dk.dtu.adapters.PaymentAdapter;
 import dk.dtu.core.models.Merchant;
 import dtu.ws.fastmoney.*;
 import io.cucumber.java.After;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -105,23 +106,37 @@ public class PaymentSteps {
 //    }
 
 
-
+//    @Before
+//    public void beforeTests() {
+//        System.out.println("Clean up");
+//        try {
+//            Account customerAccount = bankService.getAccountByCprNumber("250103-7220");
+//            if (customerAccount != null) {
+//                bankService.retireAccount(customerAccount.getId());
+//            }
+//
+//            Account merchantAccount = bankService.getAccountByCprNumber("241902-7250");
+//            if (merchantAccount != null) {
+//                bankService.retireAccount(merchantAccount.getId());
+//            }
+//        } catch (BankServiceException_Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
     @After
     public void cleanUp() {
-        System.out.println("Clean up");
         try {
-            Account customerAccount = bankService.getAccountByCprNumber(dtuPayCustomer.getCpr());
-            if (customerAccount != null) {
-                bankService.retireAccount(customerAccount.getId());
+            if (customerBankAccountNumber != null) {
+                bankService.retireAccount(customerBankAccountNumber);
             }
 
-            Account merchantAccount = bankService.getAccountByCprNumber(dtuPayMerchant.getCpr());
-            if (merchantAccount != null) {
-                bankService.retireAccount(merchantAccount.getId());
+            if (merchantBankAccountNumber != null) {
+                bankService.retireAccount(merchantBankAccountNumber);
             }
         } catch (BankServiceException_Exception e) {
             throw new RuntimeException(e);
         }
 
     }
+
 }

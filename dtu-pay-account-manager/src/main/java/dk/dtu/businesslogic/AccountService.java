@@ -12,7 +12,7 @@ public class AccountService {
 
 	public AccountService(MessageQueue q) {
 		this.queue = q;
-		queue.addHandler("CustomerRegistrationRequested", this::policyCustomerRegistrationRequested);
+		queue.addHandler("CustomerAccountRegistrationRequested", this::policyCustomerRegistrationRequested);
 	}
 	
 	/* Policies */
