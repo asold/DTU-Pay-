@@ -1,4 +1,4 @@
-package org.acme;
+package dk.dtu;
 
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 
