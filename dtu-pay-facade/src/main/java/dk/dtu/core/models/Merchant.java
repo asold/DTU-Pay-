@@ -1,43 +1,32 @@
 package dk.dtu.core.models;
 
 import org.jmolecules.ddd.annotation.Entity;
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Objects;
 
 /**
- * Represents a customer entity used throughout the client app.
+ * Models a merchant entity used throughout the client app.
  *
- * @author Andrei Soldan s243873
+ * @author Maxim Zavidei s240394
  */
 @Entity
-public final class Customer {
+public final class Merchant {
 
-    private String id;
+    private String Id;
     private String firstName;
     private String lastName;
     private String bankAccountNumber;
     private String cpr;
-    private List<Token> tokens;
 
-    public Customer(String id, String firstName, String lastName, String bankAccountNumber, String cpr) {
-        this.id = id;
+    public Merchant(String id, String firstName, String lastName, String bankAccountNumber, String cpr) {
+        this.Id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.bankAccountNumber = bankAccountNumber;
         this.cpr = cpr;
-        this.tokens = new ArrayList<Token>();
     }
 
-    public Customer() {}
-
-    public List<Token> getTokens() {
-        return tokens;
-    }
-
-    public void setTokens(List<Token> tokens) {
-        this.tokens = tokens;
-    }
+    public Merchant() {}
 
     public String getCpr() {
         return cpr;
@@ -72,23 +61,23 @@ public final class Customer {
     }
 
     public String getId() {
-        return id;
+        return Id;
     }
 
     public void setId(String id) {
-        this.id = id;
+        Id = id;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        Customer customer = (Customer) o;
-        return Objects.equals(id, customer.id);
+        Merchant customer = (Merchant) o;
+        return Objects.equals(Id, customer.Id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(Id);
     }
 }
 

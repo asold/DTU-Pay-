@@ -1,17 +1,24 @@
 #!/bin/bash
 set -e  # Exit immediately if a command exits with a non-zero status.
-./dtu-pay-account-manager mvn package
-./dtu-pay-facade mvn package
-./dtu-pay-payment-service mvn package
-./dtu-pay-report-service mvn package
-./dtu-pay-token-manager mvn package
 
+# Build all Maven projects
+for service in dtu-pay-account-manager dtu-pay-facade dtu-pay-payment-service dtu-pay-report-service dtu-pay-token-manager; do
+    echo "Building $service..."
+    cd $service
+    mvn package
+    cd ..
+done
+
+# Build and start Docker containers
 docker compose build
 docker compose up -d
 sleep 2
+
 # Navigate to the client directory
-./dtu-pay-client mvn clean install
+cd dtu-pay-client
+mvn clean install
+cd ..
+
 echo "Building the Java project in the client directory and running the tests..."
 echo "Running Maven tests in the client directory..."
 echo "Build and tests completed successfully after pushing to Gitlab!"
-

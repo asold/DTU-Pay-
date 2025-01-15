@@ -1,10 +1,10 @@
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-COPY dtu-pay-account-manager/pom.xml .
+COPY /pom.xml .
 RUN mvn dependency:go-offline
 
-COPY dtu-pay-account-manager/src ./src
+COPY /src ./src
 RUN mvn clean package -DskipTests
 
 FROM openjdk:21-jdk-slim

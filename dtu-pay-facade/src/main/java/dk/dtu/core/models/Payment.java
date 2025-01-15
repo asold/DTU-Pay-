@@ -1,6 +1,7 @@
 package dk.dtu.core.models;
 
 import org.jmolecules.ddd.annotation.ValueObject;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;

@@ -1,6 +1,7 @@
 package dk.dtu.core.models;
 
 import org.jmolecules.ddd.annotation.Entity;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

@@ -1,9 +1,9 @@
-#Feature: Payment
-#
-#  Scenario: Successful Payment
-#    Given a customer with name "Susan", last name "Baldwin", and CPR "250103-7210"
-#    And the customer is registered with the bank with an initial balance of 1000 kr
-#    And the customer is registered with Simple DTU Pay using their bank account
+Feature: Payment
+
+  Scenario: Successful Payment
+    Given a customer with name "Susan", last name "Baldwin", and CPR "250103-7210"
+    And the customer is registered with the bank with an initial balance of 1000 kr
+    And the customer is registered with Simple DTU Pay using their bank account
 #    And the customer has a valid token from DTU Pay
 #    And a merchant with name "Daniel", last name "Oliver", and CPR "241902-7250"
 #    And the merchant is registered with the bank with an initial balance of 1000 kr

@@ -3,6 +3,11 @@ package dk.dtu.core.models;
 import org.jmolecules.ddd.annotation.Entity;
 import java.util.Objects;
 
+/**
+ * Models a merchant entity used throughout the client app.
+ *
+ * @author Maxim Zavidei s240394
+ */
 @Entity
 public final class Merchant {
 

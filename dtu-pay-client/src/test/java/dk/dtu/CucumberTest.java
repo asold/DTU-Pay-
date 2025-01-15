@@ -12,7 +12,7 @@ import io.cucumber.junit.CucumberOptions.SnippetType;
 
 @CucumberOptions(
 		features = "features",
-		glue = {"dtu.dk"},
+		glue = {"dk.dtu"},
 		plugin = {"pretty", "html:target/cucumber-report.html"},
 		monochrome = true
 )
