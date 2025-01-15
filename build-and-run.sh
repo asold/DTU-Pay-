@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e  # Exit immediately if a command exits with a non-zero status.
 
+mvn clean install -f messaging-utilities/pom.xml
+
 # Build all Maven projects
-for service in dtu-pay-account-manager dtu-pay-facade dtu-pay-payment-service dtu-pay-report-service dtu-pay-token-manager; do
+for service in messaging-utilities dtu-pay-account-manager dtu-pay-facade dtu-pay-payment-service dtu-pay-report-service dtu-pay-token-manager; do
     echo "Building $service..."
     cd $service
     mvn package
