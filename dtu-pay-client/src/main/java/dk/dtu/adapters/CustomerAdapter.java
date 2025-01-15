@@ -21,7 +21,7 @@ public final class CustomerAdapter {
      * @author Andrei Soldan s243873
      */
     public String register(Customer dtuPayCustomer) {
-        Response response = client.target("http://localhost:/8082/customers")
+        Response response = client.target("http://localhost:8082/customers")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.json(dtuPayCustomer));
 
