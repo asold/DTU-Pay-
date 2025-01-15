@@ -10,5 +10,11 @@ public class StartUp {
 
 	private void startUp() throws Exception {
 		new AccountService(new RabbitMqQueue("rabbitMq"));
+
+		// Keep the main thread alive to prevent shutdown
+		System.out.println("Account Manager is running. Press Ctrl+C to stop.");
+		synchronized (this) {
+			wait(); // Keeps the main thread alive indefinitely
+		}
 	}
 }
