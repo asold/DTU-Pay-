@@ -84,6 +84,13 @@
 			<type>pom</type>
 		</dependency>
 
+
+        <dependency>
+            <groupId>org.jmolecules</groupId>
+            <artifactId>jmolecules-ddd</artifactId>
+            <version>1.9.0</version>
+        </dependency>
+
 	</dependencies>
 
   <build>
