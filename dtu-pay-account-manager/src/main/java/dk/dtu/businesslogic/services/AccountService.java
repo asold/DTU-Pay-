@@ -39,7 +39,7 @@ public class AccountService {
 	 */
 	public void policyCustomerRegistrationRequested(Event event) {
 		logger.info("Handling the customer account registration event");
-		var customer = event.getArgument(0, Customer.class);
+		var customer = event.getArgument(1, Customer.class);
 		createCustomerAccount(customer);
 	}
 
@@ -49,7 +49,7 @@ public class AccountService {
 	 */
 	public void policyMerchantRegistrationRequested(Event event) {
 		logger.info("Handling the merchant account registration event");
-		var merchant = event.getArgument(0, Merchant.class);
+		var merchant = event.getArgument(1, Merchant.class);
 		createMerchantAccount(merchant);
 	}
 
@@ -60,8 +60,9 @@ public class AccountService {
 	 */
 	public void tokenValidated(Event event) {
 		logger.info("Handling the token validated event");
-		var customerId = event.getArgument(0, String.class);
-		retrieveCustomerBankAccount(customerId);
+		UUID correlationId = event.getArgument(0, UUID.class);
+		var customerId = event.getArgument(1, String.class);
+		retrieveCustomerBankAccount(customerId, correlationId);
 	}
 
 
@@ -71,8 +72,9 @@ public class AccountService {
 	 */
 	private void paymentRequested(Event event) {
 		logger.info("Handling the payment requested event");
+		UUID correlationId = event.getArgument(0, UUID.class);
 		var merchantId = event.getArgument(2, String.class);
-		retrieveMerchantBankAccount(merchantId);
+		retrieveMerchantBankAccount(merchantId, correlationId);
 	}
 
 	/* Commands */
@@ -105,24 +107,26 @@ public class AccountService {
 	/**
 	 * Gets a stored customer by the given ID, if succeeds publish a 'CustomerBankAccountRetrieved' event
 	 * @param customerId the customer ID
+	 * @param correlationId the correlation ID
 	 * @throws RuntimeException if there is no customer with the given ID
 	 */
-	private void retrieveCustomerBankAccount(String customerId) {
+	private void retrieveCustomerBankAccount(String customerId, UUID correlationId) {
 		var customerAccount = accountRepository.getCustomerById(customerId)
 				.orElseThrow(() -> new RuntimeException("Customer not found"));
 		logger.info("Customer account found, publishing back");
-		queue.publish(new Event("CustomerBankAccountRetrieved", customerAccount.getBankAccountNumber()));
+		queue.publish(new Event("CustomerBankAccountRetrieved", correlationId ,customerAccount.getBankAccountNumber()));
 	}
 
 	/**
 	 * Gets a stored merchant by the given ID, if succeeds publish a 'MerchantBankAccountRetrieved' event
 	 * @param merchantId the customer ID
+	 * @param correlationId the correlation ID
 	 * @throws RuntimeException if there is no merchant with the given ID
 	 */
-	private void retrieveMerchantBankAccount(String merchantId) {
+	private void retrieveMerchantBankAccount(String merchantId, UUID correlationId) {
 		var merchantAccount = accountRepository.getMerchantById(merchantId)
 				.orElseThrow(() -> new RuntimeException("Merchant not found"));
 		logger.info("Merchant account found, publishing back");
-		queue.publish(new Event("MerchantBankAccountRetrieved", merchantAccount.getBankAccountNumber()));
+		queue.publish(new Event("MerchantBankAccountRetrieved",correlationId, merchantAccount.getBankAccountNumber()));
 	}
 }
