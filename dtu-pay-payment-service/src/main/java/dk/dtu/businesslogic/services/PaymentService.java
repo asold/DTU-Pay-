@@ -1,6 +1,6 @@
 package dk.dtu.businesslogic.services;
 
-import dk.dtu.businesslogic.modls.PaymentResponse;
+import dk.dtu.businesslogic.models.PaymentResponse;
 import dtu.ws.fastmoney.BankServiceException_Exception;
 import messaging.Event;
 import messaging.MessageQueue;
@@ -27,24 +27,14 @@ public final class PaymentService {
         queue.addHandler("PaymentRequested", this::paymentRequestedPolicy);
         queue.addHandler("CustomerBankAccountRetrieved", this::customerBankAccountRetrievedEventHandler);
         queue.addHandler("MerchantBankAccountRetrieved", this::merchantBankAccountRetrievedEventHandler);
+        pendingPaymentCommandsMap = new HashMap<>();
     }
 
     private void paymentRequestedPolicy(Event event) {
         var amount = event.getArgument(3, BigDecimal.class);
         var correlationId = event.getArgument(0, UUID.class);
-
-        var existentPaymentCommand = pendingPaymentCommandsMap.get(correlationId);
-        if (existentPaymentCommand == null)
-        {
-            // Here it means that this event was the first piece of information regarding the payment that was received.
-            var paymentCommand = new CreatePaymentCommand();
-            paymentCommand.setAmount(amount);
-            pendingPaymentCommandsMap.put(correlationId, paymentCommand);
-            return;
-        }
-
-        // Here the payment exists.
-        var paymentCommand = pendingPaymentCommandsMap.get(correlationId);
+        // Retrieve or create a new payment command
+        var paymentCommand = pendingPaymentCommandsMap.computeIfAbsent(correlationId, k -> new CreatePaymentCommand());
         paymentCommand.setAmount(amount);
         executePaymentIfAllEventsArrived(correlationId);
     }
@@ -52,19 +42,8 @@ public final class PaymentService {
     private void customerBankAccountRetrievedEventHandler(Event event) {
         var customerBankAccount = event.getArgument(1, String.class);
         var correlationId = event.getArgument(0, UUID.class);
-
-        var existentPaymentCommand = pendingPaymentCommandsMap.get(correlationId);
-        if (existentPaymentCommand == null)
-        {
-            // Here it means that this event was the first piece of information regarding the payment that was received.
-            var paymentCommand = new CreatePaymentCommand();
-            paymentCommand.setCustomerBankAccountId(customerBankAccount);
-            pendingPaymentCommandsMap.put(correlationId, paymentCommand);
-            return;
-        }
-
-        // Here the payment exists.
-        var paymentCommand = pendingPaymentCommandsMap.get(correlationId);
+        // Retrieve or create a new payment command
+        var paymentCommand = pendingPaymentCommandsMap.computeIfAbsent(correlationId, k -> new CreatePaymentCommand());
         paymentCommand.setCustomerBankAccountId(customerBankAccount);
         executePaymentIfAllEventsArrived(correlationId);
     }
@@ -72,19 +51,8 @@ public final class PaymentService {
     private void merchantBankAccountRetrievedEventHandler(Event event) {
         var merchantBankAccount = event.getArgument(1, String.class);
         var correlationId = event.getArgument(0, UUID.class);
-
-        var existentPaymentCommand = pendingPaymentCommandsMap.get(correlationId);
-        if (existentPaymentCommand == null)
-        {
-            // Here it means that this event was the first piece of information regarding the payment that was received.
-            var paymentCommand = new CreatePaymentCommand();
-            paymentCommand.setMerchantBankAccountId(merchantBankAccount);
-            pendingPaymentCommandsMap.put(correlationId, paymentCommand);
-            return;
-        }
-
-        // Here the payment exists.
-        var paymentCommand = pendingPaymentCommandsMap.get(correlationId);
+        // Retrieve or create a new payment command
+        var paymentCommand = pendingPaymentCommandsMap.computeIfAbsent(correlationId, k -> new CreatePaymentCommand());
         paymentCommand.setMerchantBankAccountId(merchantBankAccount);
         executePaymentIfAllEventsArrived(correlationId);
     }
@@ -95,13 +63,11 @@ public final class PaymentService {
         if (paymentCommand.getCustomerBankAccountId() != null && paymentCommand.getMerchantBankAccountId() != null && paymentCommand.getAmount() != null)
         {
             // Here it means we have received all the data for a payment
-
             // Execute Payment
             try
             {
                 var paymentDescription = "Money transfer of amount:" + paymentCommand.getAmount();
                 bankService.transferMoneyFromTo(paymentCommand.getCustomerBankAccountId(), paymentCommand.getMerchantBankAccountId(), paymentCommand.getAmount(), paymentDescription);
-
                 // Because we took the payment id as the correlation id, we publish an event stating that
                 // the payment was successful for that correlation id, which effectively can be interpreted as a payment id.
                 var paymentResponse = new PaymentResponse(correlationId, true);

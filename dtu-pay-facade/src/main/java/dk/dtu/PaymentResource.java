@@ -9,6 +9,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import java.math.BigDecimal;
 import java.util.concurrent.ExecutionException;
@@ -23,8 +24,9 @@ public class PaymentResource {
 
 
     @POST
-    public void requestPayment(Payment payment) throws ExecutionException, InterruptedException {
+    public Response requestPayment(Payment payment) throws ExecutionException, InterruptedException {
         PaymentResponse response = paymentFacade.requestPayment(payment);
+        return Response.ok(response).build();
     }
 
 }

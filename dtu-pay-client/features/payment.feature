@@ -9,7 +9,7 @@ Feature: Payment
     And the merchant is registered with the bank with an initial balance of 1000 kr
     And the merchant is registered with Simple DTU Pay using their bank account
     When the merchant initiates a payment for 10 kr using the customer's token
-#    Then the payment is successful
+    Then the payment is successful
 #    And the balance of the customer at the bank is 990 kr
 #    And the balance of the merchant at the bank is 1010 kr
 #    And the customer's token is no longer valid

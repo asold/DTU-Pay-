@@ -37,4 +37,13 @@ public final class CreatePaymentCommand {
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
+
+    @Override
+    public String toString() {
+        return "CreatePaymentCommand{" +
+                "merchantBankAccountId='" + merchantBankAccountId + '\'' +
+                ", customerBankAccountId='" + customerBankAccountId + '\'' +
+                ", amount=" + amount +
+                '}';
+    }
 }

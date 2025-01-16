@@ -38,7 +38,6 @@ public class AccountService {
 	 * @param event the event
 	 */
 	public void policyCustomerRegistrationRequested(Event event) {
-		logger.info("Handling the customer account registration event");
 		var customer = event.getArgument(0, Customer.class);
 		createCustomerAccount(customer);
 	}
@@ -48,7 +47,6 @@ public class AccountService {
 	 * @param event the event
 	 */
 	public void policyMerchantRegistrationRequested(Event event) {
-		logger.info("Handling the merchant account registration event");
 		var merchant = event.getArgument(0, Merchant.class);
 		createMerchantAccount(merchant);
 	}
@@ -59,7 +57,6 @@ public class AccountService {
 	 * @param event the event
 	 */
 	public void tokenValidated(Event event) {
-		logger.info("Handling the token validated event");
 		UUID correlationId = event.getArgument(0, UUID.class);
 		var customerId = event.getArgument(1, String.class);
 		retrieveCustomerBankAccount(customerId, correlationId);
@@ -71,7 +68,6 @@ public class AccountService {
 	 * @param event the event
 	 */
 	private void paymentRequested(Event event) {
-		logger.info("Handling the payment requested event");
 		UUID correlationId = event.getArgument(0, UUID.class);
 		var merchantId = event.getArgument(2, String.class);
 		retrieveMerchantBankAccount(merchantId, correlationId);
@@ -86,9 +82,7 @@ public class AccountService {
 	private void createCustomerAccount(Customer customer) {
 		String cid = UUID.randomUUID().toString();
 		customer.setId(cid);
-		logger.info("Trying to save the customer");
 		accountRepository.addCustomer(customer);
-		logger.info("Customer saved, publishing back");
 		queue.publish(new Event("CustomerRegistered", cid));
 	}
 
@@ -113,7 +107,6 @@ public class AccountService {
 	private void retrieveCustomerBankAccount(String customerId, UUID correlationId) {
 		var customerAccount = accountRepository.getCustomerById(customerId)
 				.orElseThrow(() -> new RuntimeException("Customer not found"));
-		logger.info("Customer account found, publishing back");
 		queue.publish(new Event("CustomerBankAccountRetrieved", correlationId ,customerAccount.getBankAccountNumber()));
 	}
 
@@ -126,7 +119,6 @@ public class AccountService {
 	private void retrieveMerchantBankAccount(String merchantId, UUID correlationId) {
 		var merchantAccount = accountRepository.getMerchantById(merchantId)
 				.orElseThrow(() -> new RuntimeException("Merchant not found"));
-		logger.info("Merchant account found, publishing back");
 		queue.publish(new Event("MerchantBankAccountRetrieved",correlationId, merchantAccount.getBankAccountNumber()));
 	}
 }

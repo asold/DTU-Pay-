@@ -29,6 +29,6 @@ public class MerchantResource {
     public Response registerCustomer(Merchant merchant) throws URISyntaxException, ExecutionException, InterruptedException {
 
         String merchantId = merchantFacade.registerMerchant(merchant);
-        return Response.created(new URI("/customers/" + merchantId)).entity(merchantId).build();
+        return Response.created(new URI("/merchants/" + merchantId)).entity(merchantId).build();
     }
 }

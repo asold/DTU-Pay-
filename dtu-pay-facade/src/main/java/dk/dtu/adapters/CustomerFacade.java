@@ -36,7 +36,6 @@ public class CustomerFacade {
     public String registerCustomer(Customer customer) throws InterruptedException, ExecutionException {
         customerId = new CompletableFuture<>();
         queue.publish(new Event("CustomerAccountRegistrationRequested", customer));
-        System.out.println("Publishing new event for customer reg.");
         return customerId.get();
     }
 }

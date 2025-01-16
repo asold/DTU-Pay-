@@ -88,19 +88,12 @@ public class TokenService {
                 generateTokens(customerId, amount);
                 var result = tokenRepository.getUnusedTokensByCustomerId(customerId);
                 List<TokenResult> returnValue = result.stream().map(token -> new TokenResult(token.getTokenId())).toList();
-                System.out.println("publishing user had no tokens");
-                System.out.println("---------------" + returnValue);
-                System.out.println("------------- customerTokens: " + returnValue.getClass());
-                for (Object token : returnValue) {
-                    System.out.println("++++++++++++++++++++++ Element type: " + token.getClass());
-                }
                 queue.publish(new Event("TokensGenerated", returnValue ));
             }
             else if (amount + listTokens.size() <= 5) {
                 generateTokens(customerId, amount);
                 var result = tokenRepository.getUnusedTokensByCustomerId(customerId);
                 List<TokenResult> returnValue = result.stream().map(token -> new TokenResult(token.getTokenId())).toList();
-                System.out.println("publishing user had some tokens");
                 queue.publish(new Event("TokensGenerated", returnValue));
             }
             else {

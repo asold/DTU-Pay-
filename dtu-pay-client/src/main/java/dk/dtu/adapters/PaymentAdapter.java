@@ -17,7 +17,6 @@ public final class PaymentAdapter {
 
     private Client client = ClientBuilder.newBuilder().build();
 
-
     public PaymentResponse requestPayment(Payment payment) {
         Response response = client.target("http://localhost:8082/payments")
                 .request(MediaType.APPLICATION_JSON_TYPE)

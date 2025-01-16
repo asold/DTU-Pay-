@@ -28,8 +28,8 @@ public class TokenFacade {
     }
 
     private void policyTokensGenerated(Event e){
+        // This is done for serialization
         Type listType = new TypeToken<List<TokenResult>>() {}.getType();
-
         List<TokenResult> tokenResults = e.getArgument(0, listType);
         tokens.complete(tokenResults);
     }
@@ -37,14 +37,6 @@ public class TokenFacade {
     public List<TokenResult> getTokens(String id, int amount) throws ExecutionException, InterruptedException {
         tokens = new CompletableFuture<>();
         queue.publish(new Event("TokensRequested", id, amount));
-
-        System.out.println("---------------" + tokens);
-        System.out.println("------------- customerTokens: " + tokens.getClass());
-        for (Object token : tokens.get()) {
-            System.out.println("++++++++++++++++++++++ Element type: " + token.getClass());
-        }
-
-
         return tokens.get();
     }
 
