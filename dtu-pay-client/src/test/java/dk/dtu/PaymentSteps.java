@@ -5,6 +5,7 @@ import dk.dtu.adapters.CustomerAdapter;
 import dk.dtu.adapters.MerchantAdapter;
 import dk.dtu.adapters.PaymentAdapter;
 import dk.dtu.core.models.Merchant;
+import dk.dtu.core.models.Token;
 import dtu.ws.fastmoney.*;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -14,12 +15,14 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class PaymentSteps {
 
     private BankService bankService = new BankServiceService().getBankServicePort();
 
     private User bankCustomer;
+    private User bankMerchant;
 
     private CustomerAdapter customerAdapter = new CustomerAdapter();
     private PaymentAdapter paymentAdapter = new PaymentAdapter();
@@ -31,8 +34,7 @@ public class PaymentSteps {
     private String customerBankAccountNumber;
     private String merchantBankAccountNumber;
 
-
-
+    private List<Token> customerTokens;
 
     @Given("a customer with name {string}, last name {string}, and CPR {string}")
     public void aCustomerWithNameLastNameAndCPR(String firstName, String lastName, String cpr) {
@@ -61,30 +63,48 @@ public class PaymentSteps {
         dtuPayCustomer.setId(customerAdapter.register(dtuPayCustomer));
     }
 
-//    @And("the customer has a valid token from DTU Pay")
-//    public void theCustomerHasAValidTokenFromDTUPay() {
-//
-//    }
-//
-//    @And("a merchant with name {string}, last name {string}, and CPR {string}")
-//    public void aMerchantWithNameLastNameAndCPR(String arg0, String arg1, String arg2) {
-//
-//    }
-//
-//    @And("the merchant is registered with the bank with an initial balance of {int} kr")
-//    public void theMerchantIsRegisteredWithTheBankWithAnInitialBalanceOfKr(int arg0) {
-//
-//    }
-//
-//    @And("the merchant is registered with Simple DTU Pay using their bank account")
-//    public void theMerchantIsRegisteredWithSimpleDTUPayUsingTheirBankAccount() {
-//
-//    }
-//
-//    @When("the merchant initiates a payment for {int} kr using the customer's token")
-//    public void theMerchantInitiatesAPaymentForKrUsingTheCustomerSToken(int arg0) {
-//
-//    }
+    @And("the customer has {int} valid token from DTU Pay")
+    public void theCustomerHasAValidTokenFromDTUPay(int amount) {
+        customerTokens = customerAdapter.getTokens(dtuPayCustomer.getId(), amount ); // the customer class has a field for this ->
+        dtuPayCustomer.setTokens(customerTokens);
+    }
+
+    @And("a merchant with name {string}, last name {string}, and CPR {string}")
+    public void aMerchantWithNameLastNameAndCPR(String firstName, String lastName, String cpr) {
+        // Initialize the User model from the bank integration
+        bankMerchant = new User();
+        bankMerchant.setFirstName(firstName);
+        bankMerchant.setLastName(lastName);
+        bankMerchant.setCprNumber(cpr);
+
+        // Initialize the dtuPayCustomer model
+        dtuPayMerchant = new Merchant();
+        dtuPayMerchant.setFirstName(firstName);
+        dtuPayMerchant.setLastName(lastName);
+        dtuPayMerchant.setCpr(cpr);
+    }
+
+    @And("the merchant is registered with the bank with an initial balance of {int} kr")
+    public void theMerchantIsRegisteredWithTheBankWithAnInitialBalanceOfKr(int balance) throws BankServiceException_Exception {
+        merchantBankAccountNumber = bankService.createAccountWithBalance(this.bankMerchant, new BigDecimal(balance));
+        dtuPayMerchant.setBankAccountNumber(merchantBankAccountNumber);
+    }
+
+    @And("the merchant is registered with Simple DTU Pay using their bank account")
+    public void theMerchantIsRegisteredWithSimpleDTUPayUsingTheirBankAccount() {
+        // Register the merchant with DTU Pay
+        dtuPayMerchant.setId(merchantAdapter.register(dtuPayMerchant));
+    }
+
+    @When("the merchant initiates a payment for {int} kr using the customer's token")
+    public void theMerchantInitiatesAPaymentForKrUsingTheCustomerSToken(int arg0) {
+        // a new payment is created with merchantId, amount, and a random token form the list
+        // goes to the facade
+        // in the facade:
+            //1. Validate the token -> token manager -> account manager -> payment service
+            //2. publish merchantId -> account manager -> payment service
+            //3. publish amount -> payment service
+    }
 //
 //    @Then("the payment is successful")
 //    public void thePaymentIsSuccessful() {
@@ -106,23 +126,24 @@ public class PaymentSteps {
 //    }
 
 
-//    @Before
-//    public void beforeTests() {
-//        System.out.println("Clean up");
-//        try {
-//            Account customerAccount = bankService.getAccountByCprNumber("250103-7220");
-//            if (customerAccount != null) {
-//                bankService.retireAccount(customerAccount.getId());
-//            }
-//
-//            Account merchantAccount = bankService.getAccountByCprNumber("241902-7250");
-//            if (merchantAccount != null) {
-//                bankService.retireAccount(merchantAccount.getId());
-//            }
-//        } catch (BankServiceException_Exception e) {
+    @Before
+    public void beforeTests() {
+        System.out.println("Clean up");
+        try {
+            Account customerAccount = bankService.getAccountByCprNumber("250103-7220");
+            if (customerAccount != null) {
+                bankService.retireAccount(customerAccount.getId());
+            }
+
+            Account merchantAccount = bankService.getAccountByCprNumber("241902-7250");
+            if (merchantAccount != null) {
+                bankService.retireAccount(merchantAccount.getId());
+            }
+        } catch (BankServiceException_Exception e) {
 //            throw new RuntimeException(e);
-//        }
-//    }
+            System.out.println(e.getMessage());
+        }
+    }
     @After
     public void cleanUp() {
         try {

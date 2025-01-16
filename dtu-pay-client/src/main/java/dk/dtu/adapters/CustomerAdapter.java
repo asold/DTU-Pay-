@@ -1,11 +1,14 @@
 package dk.dtu.adapters;
 
 import dk.dtu.core.models.Customer;
+import dk.dtu.core.models.Token;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.util.List;
 
 /**
  * Driven adapter responsible for abstracting inter-process communication related to any customer use-cases and scenarios.
@@ -26,5 +29,14 @@ public final class CustomerAdapter {
                 .post(Entity.json(dtuPayCustomer));
 
         return response.readEntity(String.class);
+    }
+
+    public List<Token> getTokens(String id, int amount) {
+        Response response = client.target("http://localhost:8082/tokens/" + id)
+                .queryParam("amount", amount)
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+
+        return response.readEntity(List.class);
     }
 }

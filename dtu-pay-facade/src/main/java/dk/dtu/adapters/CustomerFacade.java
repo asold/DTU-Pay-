@@ -29,12 +29,14 @@ public class CustomerFacade {
     }
 
     private void policyCustomerRegistered(Event e) {
+        System.out.println("Policy customer registered");
         customerId.complete(e.getArgument(0, String.class));
     }
 
     public String registerCustomer(Customer customer) throws InterruptedException, ExecutionException {
         customerId = new CompletableFuture<>();
         queue.publish(new Event("CustomerAccountRegistrationRequested", customer));
+        System.out.println("Publishing new event for customer reg.");
         return customerId.get();
     }
 }
