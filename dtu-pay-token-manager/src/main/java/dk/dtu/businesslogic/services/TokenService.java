@@ -1,22 +1,69 @@
 package dk.dtu.businesslogic.services;
 
 import dk.dtu.businesslogic.exceptions.DuplicateTokenUUIDException;
+import dk.dtu.businesslogic.exceptions.InvalidTokenException;
+import dk.dtu.businesslogic.exceptions.TokenNotFoundException;
 import dk.dtu.businesslogic.models.Token;
 import dk.dtu.businesslogic.repositories.TokenRepository;
 import messaging.Event;
 import messaging.MessageQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
 public class TokenService {
 
-    private MessageQueue queue;
+    private static final Logger log = LoggerFactory.getLogger(TokenService.class);
+    private final MessageQueue queue;
     private final TokenRepository tokenRepository;
 
     public TokenService(MessageQueue q) {
         this.queue = q;
         queue.addHandler("TokensRequested", this::policyTokensRequested);
+        queue.addHandler("PaymentRequested", this::policyPaymentRequested);
         tokenRepository = new TokenRepository();
+    }
+
+    private void policyPaymentRequested(Event event) {
+        UUID correlationId = event.getArgument(0, UUID.class);
+        UUID token = event.getArgument(1, UUID.class);
+        try{
+            String customerId = validateToken(token);
+            queue.publish(new Event("TokenValidated", correlationId, customerId));
+        } catch (InvalidTokenException e) {
+            log.error("e:", e);
+            queue.publish(new Event("TokenValidationFailed", correlationId, "Invalid Token"));
+        } catch (Exception e) {
+            log.error("e: ", e);
+            queue.publish(new Event("TokenValidationFailed", correlationId, "Error Validating Token"));
+        }
+    }
+
+    private String validateToken(UUID tokenId) throws InvalidTokenException {
+        Token token;
+        try {
+            token = tokenRepository.getTokenByValue(tokenId);
+        } catch (TokenNotFoundException e) {
+            throw new InvalidTokenException("Token " + tokenId+ "  not found");
+        }
+        if(token.isNotUsed()){
+            revokeToken(token);
+            return token.getCustomerId();
+        }
+        else{
+            throw new InvalidTokenException("Token " + tokenId + " was already used");
+        }
+
+    }
+
+    private void revokeToken(Token token) {
+        token.setUsed(true);
+        try {
+            tokenRepository.modifyToken(token);
+        } catch (TokenNotFoundException e) {
+            throw new RuntimeException("Error modifying Token", e);
+        }
     }
 
     private void policyTokensRequested(Event event) {
@@ -57,11 +104,8 @@ public class TokenService {
 
     private void generateTokens(String customerId, int amount) throws DuplicateTokenUUIDException {
         for (int i = 0; i < amount; i++){
-            Token token = new Token(customerId, UUID.randomUUID(), false);
+            Token token = new Token(UUID.randomUUID(), customerId);
             tokenRepository.saveToken(token);
         }
     }
-
-
-
 }

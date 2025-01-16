@@ -1,14 +1,34 @@
 package dk.dtu.businesslogic.models;
 
-import org.jmolecules.ddd.annotation.ValueObject;
-
+import org.jmolecules.ddd.annotation.Entity;
 import java.util.UUID;
 
-/**
- * Models a token value object needed by a customer to make a payment.
- *
- * @author Mihály Tass s243573
- */
-@ValueObject
-public record Token(String customerId, UUID token, boolean wasUsed) {
+
+@Entity
+public final class Token {
+    private final UUID tokenId;
+    private final String customerId;
+    private boolean used;
+
+    public Token(UUID tokenId, String customerId) {
+        this.tokenId = tokenId;
+        this.customerId = customerId;
+        this.used = false;
+    }
+
+    public UUID getTokenId() {
+        return tokenId;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public boolean isNotUsed() {
+        return !used;
+    }
+
+    public void setUsed(boolean used) {
+        this.used = used;
+    }
 }
