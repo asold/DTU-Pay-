@@ -13,12 +13,11 @@ import java.util.UUID;
  */
 @ValueObject
 public final class Payment {
-
     private String merchantId;
     private UUID token;
     private BigDecimal amount;
 
-    public Payment(String merchantId, UUID token, BigDecimal amount) {
+    public Payment( String merchantId, UUID token, BigDecimal amount) {
         this.merchantId = merchantId;
         this.token = token;
         this.amount = amount;

@@ -6,7 +6,6 @@ import dk.dtu.businesslogic.repositories.TokenRepository;
 import messaging.Event;
 import messaging.MessageQueue;
 
-import java.util.List;
 import java.util.UUID;
 
 public class TokenService {

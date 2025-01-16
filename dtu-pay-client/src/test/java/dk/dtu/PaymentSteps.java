@@ -1,11 +1,9 @@
 package dk.dtu;
 
-import dk.dtu.core.models.Customer;
+import dk.dtu.core.models.*;
 import dk.dtu.adapters.CustomerAdapter;
 import dk.dtu.adapters.MerchantAdapter;
 import dk.dtu.adapters.PaymentAdapter;
-import dk.dtu.core.models.Merchant;
-import dk.dtu.core.models.Token;
 import dtu.ws.fastmoney.*;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -16,6 +14,8 @@ import io.cucumber.java.en.When;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 public class PaymentSteps {
 
@@ -97,7 +97,11 @@ public class PaymentSteps {
     }
 
     @When("the merchant initiates a payment for {int} kr using the customer's token")
-    public void theMerchantInitiatesAPaymentForKrUsingTheCustomerSToken(int arg0) {
+    public void theMerchantInitiatesAPaymentForKrUsingTheCustomerSToken(int amount) {
+        Token randomTokenFromCustomerList = customerTokens.get(new Random().nextInt(customerTokens.size()));
+        Payment payment = new Payment(dtuPayMerchant.getId(), randomTokenFromCustomerList.token(), new BigDecimal(amount));
+
+        PaymentResponse response = paymentAdapter.requestPayment(payment);
         // a new payment is created with merchantId, amount, and a random token form the list
         // goes to the facade
         // in the facade:

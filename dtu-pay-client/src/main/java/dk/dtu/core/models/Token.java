@@ -9,5 +9,5 @@ import java.util.UUID;
  * @author Mihály Tass s243573
  */
 @ValueObject
-public record Token (String customerId, UUID token, boolean wasUsed) {
-}
+//public record Token (String customerId, UUID token, boolean wasUsed) {}
+public record Token (UUID token) {}
