@@ -22,6 +22,11 @@ public class TokenResource {
     @Path("{id}")
     public Response getTokens(@PathParam("id") String id, @QueryParam("amount") int amount) throws ExecutionException, InterruptedException {
         List<TokenResult> customerTokens = tokenFacade.getTokens(id, amount);
+        System.out.println("customerTokens: " + customerTokens);
+        System.out.println("customerTokens: " + customerTokens.getClass());
+        for (Object token : customerTokens) {
+            System.out.println("Element type: " + token.getClass());
+        }
         return Response.ok(customerTokens).build();
     }
 }

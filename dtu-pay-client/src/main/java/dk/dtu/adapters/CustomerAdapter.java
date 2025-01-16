@@ -37,6 +37,14 @@ public final class CustomerAdapter {
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
-        return response.readEntity(List.class);
+        List<TokenResult> receivedTokens = response.readEntity(List.class);
+
+        System.out.println("---------------" + receivedTokens);
+        System.out.println("------------- customerTokens: " + receivedTokens.getClass());
+        for (Object token : receivedTokens) {
+            System.out.println("++++++++++++++++++++++ Element type: " + token.getClass());
+        }
+
+        return receivedTokens;
     }
 }
