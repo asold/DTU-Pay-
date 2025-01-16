@@ -96,7 +96,8 @@ public class PaymentSteps {
     @And("the merchant is registered with Simple DTU Pay using their bank account")
     public void theMerchantIsRegisteredWithSimpleDTUPayUsingTheirBankAccount() {
         // Register the merchant with DTU Pay
-        dtuPayMerchant.setId(merchantAdapter.register(dtuPayMerchant));
+        String merchantId = merchantAdapter.register(dtuPayMerchant);
+        dtuPayMerchant.setId(merchantId);
     }
 
     @When("the merchant initiates a payment for {int} kr using the customer's token")

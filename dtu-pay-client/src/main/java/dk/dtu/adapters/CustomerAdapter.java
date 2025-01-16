@@ -5,6 +5,7 @@ import dk.dtu.core.models.TokenResult;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -37,13 +38,7 @@ public final class CustomerAdapter {
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
-        List<TokenResult> receivedTokens = response.readEntity(List.class);
-
-        System.out.println("---------------" + receivedTokens);
-        System.out.println("------------- customerTokens: " + receivedTokens.getClass());
-        for (Object token : receivedTokens) {
-            System.out.println("++++++++++++++++++++++ Element type: " + token.getClass());
-        }
+        List<TokenResult> receivedTokens = response.readEntity(new GenericType<List<TokenResult>>() {});
 
         return receivedTokens;
     }

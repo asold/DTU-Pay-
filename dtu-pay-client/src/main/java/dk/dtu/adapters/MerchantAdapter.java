@@ -14,9 +14,8 @@ public final class MerchantAdapter {
 
     private final Client client = ClientBuilder.newBuilder().build();
 
-
     public String register(Merchant dtuPayMerchant) {
-        Response response = client.target("http://localhost:8082/customers")
+        Response response = client.target("http://localhost:8082/merchants")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.json(dtuPayMerchant));
 
