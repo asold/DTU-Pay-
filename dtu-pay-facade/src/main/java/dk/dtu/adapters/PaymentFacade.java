@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 @Singleton
 public class PaymentFacade {
 
-    private MessageQueue queue;
+    private final MessageQueue queue;
 //    private CompletableFuture<PaymentResponse> paymentResponse;
     private CompletableFuture<PaymentResponse> paymentResponse;
 
@@ -25,11 +25,12 @@ public class PaymentFacade {
 
     public PaymentFacade(MessageQueue q) {
         queue = q;
-        q.addHandler("PaymentProcessed", this::policyPaymentSucceeded);
+        q.addHandler("PaymentProcessed", this::policyPaymentProcessed);
     }
 
-    private void policyPaymentSucceeded(Event event) {
-        var paymentResponse = event.getArgument(0, PaymentResponse.class);
+    private void policyPaymentProcessed(Event event) {
+        event.
+        paymentResponse.complete(event.getArgument(0, PaymentResponse.class));
     }
 
 

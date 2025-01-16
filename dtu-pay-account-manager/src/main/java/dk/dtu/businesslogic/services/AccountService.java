@@ -39,7 +39,7 @@ public class AccountService {
 	 */
 	public void policyCustomerRegistrationRequested(Event event) {
 		logger.info("Handling the customer account registration event");
-		var customer = event.getArgument(1, Customer.class);
+		var customer = event.getArgument(0, Customer.class);
 		createCustomerAccount(customer);
 	}
 
@@ -49,7 +49,7 @@ public class AccountService {
 	 */
 	public void policyMerchantRegistrationRequested(Event event) {
 		logger.info("Handling the merchant account registration event");
-		var merchant = event.getArgument(1, Merchant.class);
+		var merchant = event.getArgument(0, Merchant.class);
 		createMerchantAccount(merchant);
 	}
 

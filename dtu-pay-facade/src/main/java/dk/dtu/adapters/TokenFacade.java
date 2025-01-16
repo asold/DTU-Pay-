@@ -30,9 +30,7 @@ public class TokenFacade {
     }
 
     public List<Token> getTokens(String id, int amount) throws ExecutionException, InterruptedException {
-        System.out.println("Trying to get tokens");
         tokens = new CompletableFuture<>();
-        System.out.println("Publishing getting tokens");
         queue.publish(new Event("TokensRequested", id, amount));
         return tokens.get();
     }

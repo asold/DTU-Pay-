@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import static org.junit.Assert.assertTrue;
+
 public class PaymentSteps {
 
     private BankService bankService = new BankServiceService().getBankServicePort();
@@ -35,6 +37,7 @@ public class PaymentSteps {
     private String merchantBankAccountNumber;
 
     private List<Token> customerTokens;
+    private PaymentResponse paymentResponse;
 
     @Given("a customer with name {string}, last name {string}, and CPR {string}")
     public void aCustomerWithNameLastNameAndCPR(String firstName, String lastName, String cpr) {
@@ -101,19 +104,13 @@ public class PaymentSteps {
         Token randomTokenFromCustomerList = customerTokens.get(new Random().nextInt(customerTokens.size()));
         Payment payment = new Payment(dtuPayMerchant.getId(), randomTokenFromCustomerList.token(), new BigDecimal(amount));
 
-        PaymentResponse response = paymentAdapter.requestPayment(payment);
-        // a new payment is created with merchantId, amount, and a random token form the list
-        // goes to the facade
-        // in the facade:
-            //1. Validate the token -> token manager -> account manager -> payment service
-            //2. publish merchantId -> account manager -> payment service
-            //3. publish amount -> payment service
+        paymentResponse = paymentAdapter.requestPayment(payment);
     }
-//
-//    @Then("the payment is successful")
-//    public void thePaymentIsSuccessful() {
-//
-//    }
+
+    @Then("the payment is successful")
+    public void thePaymentIsSuccessful() {
+        assertTrue(paymentResponse.successful());
+    }
 //
 //    @And("the balance of the customer at the bank is {int} kr")
 //    public void theBalanceOfTheCustomerAtTheBankIsKr(int arg0) {
