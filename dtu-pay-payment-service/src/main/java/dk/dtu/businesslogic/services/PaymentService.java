@@ -109,7 +109,7 @@ public final class PaymentService {
                 queue.publish(paymentSucceededEvent);
             } catch (BankServiceException_Exception e)
             {
-                var paymentResponse = new PaymentResponse(correlationId, false);
+                var paymentResponse = new PaymentResponse(correlationId,false);
                 var paymentSucceededEvent = new Event("PaymentProcessed", paymentResponse);
                 throw new RuntimeException(e);
             }
