@@ -7,7 +7,7 @@ mvn clean install -f messaging-utilities/pom.xml
 for service in messaging-utilities dtu-pay-account-manager dtu-pay-facade dtu-pay-payment-service dtu-pay-report-service dtu-pay-token-manager; do
     echo "Building $service..."
     cd $service
-    mvn clean package
+    mvn clean test
     cd ..
 done
 

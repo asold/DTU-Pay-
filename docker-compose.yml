@@ -21,8 +21,8 @@ services:
 
   account-manager:
     build:
-      context: ./dtu-pay-account-manager
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: dtu-pay-account-manager/Dockerfile
     container_name: account-manager
     depends_on:
       rabbitmq:
@@ -33,8 +33,8 @@ services:
 
   facade:
     build:
-      context: ./dtu-pay-facade
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: dtu-pay-facade/Dockerfile
     container_name: facade
     depends_on:
       rabbitmq:
@@ -44,8 +44,8 @@ services:
 
   payment-service:
     build:
-      context: ./dtu-pay-payment-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: dtu-pay-payment-service/Dockerfile
     container_name: payment-service
     depends_on:
       rabbitmq:
@@ -55,8 +55,8 @@ services:
 
   report-service:
     build:
-      context: ./dtu-pay-report-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: dtu-pay-report-service/Dockerfile
     container_name: report-service
     depends_on:
       rabbitmq:
@@ -66,8 +66,8 @@ services:
 
   token-manager:
     build:
-      context: ./dtu-pay-token-manager
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: dtu-pay-token-manager/Dockerfile
     container_name: token-manager
     depends_on:
       rabbitmq:

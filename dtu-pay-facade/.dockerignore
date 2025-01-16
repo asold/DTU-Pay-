@@ -1,4 +1,8 @@
 *
+# Include pom.xml and the source code directory
+!pom.xml
+!src/
+
 !target/*-runner
 !target/*-runner.jar
 !target/lib/*
