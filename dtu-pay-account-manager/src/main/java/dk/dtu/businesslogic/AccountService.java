@@ -5,6 +5,9 @@ import messaging.MessageQueue;
 
 import java.util.*;
 
+/**
+ * @author  Andrei Soldan 243873
+ */
 public class AccountService {
 
 	private MessageQueue queue;
