@@ -18,7 +18,7 @@ public final class Customer {
     private String lastName;
     private String bankAccountNumber;
     private String cpr;
-    private List<Token> tokens;
+    private List<TokenResult> tokens;
 
     public Customer(String id, String firstName, String lastName, String bankAccountNumber, String cpr) {
         this.id = id;
@@ -26,16 +26,16 @@ public final class Customer {
         this.lastName = lastName;
         this.bankAccountNumber = bankAccountNumber;
         this.cpr = cpr;
-        this.tokens = new ArrayList<Token>();
+        this.tokens = new ArrayList<TokenResult>();
     }
 
     public Customer() {}
 
-    public List<Token> getTokens() {
+    public List<TokenResult> getTokens() {
         return tokens;
     }
 
-    public void setTokens(List<Token> tokens) {
+    public void setTokens(List<TokenResult> tokens) {
         this.tokens = tokens;
     }
 

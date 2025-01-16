@@ -1,7 +1,7 @@
 package dk.dtu;
 
 import dk.dtu.adapters.TokenFacade;
-import dk.dtu.core.models.Token;
+import dk.dtu.core.models.TokenResult;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -21,7 +21,7 @@ public class TokenResource {
     @GET
     @Path("{id}")
     public Response getTokens(@PathParam("id") String id, @QueryParam("amount") int amount) throws ExecutionException, InterruptedException {
-        List<Token> customerTokens = tokenFacade.getTokens(id, amount);
+        List<TokenResult> customerTokens = tokenFacade.getTokens(id, amount);
         return Response.ok(customerTokens).build();
     }
 }

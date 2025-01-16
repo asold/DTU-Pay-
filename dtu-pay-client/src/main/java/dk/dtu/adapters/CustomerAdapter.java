@@ -1,7 +1,7 @@
 package dk.dtu.adapters;
 
 import dk.dtu.core.models.Customer;
-import dk.dtu.core.models.Token;
+import dk.dtu.core.models.TokenResult;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
@@ -31,7 +31,7 @@ public final class CustomerAdapter {
         return response.readEntity(String.class);
     }
 
-    public List<Token> getTokens(String id, int amount) {
+    public List<TokenResult> getTokens(String id, int amount) {
         Response response = client.target("http://localhost:8082/tokens/" + id)
                 .queryParam("amount", amount)
                 .request(MediaType.APPLICATION_JSON)

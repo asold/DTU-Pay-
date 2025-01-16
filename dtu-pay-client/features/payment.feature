@@ -5,7 +5,7 @@ Feature: Payment
     And the customer is registered with the bank with an initial balance of 1000 kr
     And the customer is registered with Simple DTU Pay using their bank account
     And the customer has 1 valid token from DTU Pay
-    And a merchant with name "Daniel", last name "Oliver", and CPR "241902-7250"
+    And a merchant with name "Daniel", last name "Oliver", and CPR "241902-7253"
     And the merchant is registered with the bank with an initial balance of 1000 kr
     And the merchant is registered with Simple DTU Pay using their bank account
     When the merchant initiates a payment for 10 kr using the customer's token

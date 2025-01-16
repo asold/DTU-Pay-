@@ -1,6 +1,6 @@
 package dk.dtu.adapters;
 
-import dk.dtu.core.models.Token;
+import dk.dtu.core.models.TokenResult;
 import jakarta.inject.Singleton;
 import messaging.Event;
 import messaging.MessageQueue;
@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutionException;
 @Singleton
 public class TokenFacade {
 
-    private CompletableFuture<List<Token>> tokens;
+    private CompletableFuture<List<TokenResult>> tokens;
 
     private final MessageQueue queue;
 
@@ -29,7 +29,7 @@ public class TokenFacade {
         tokens.complete(e.getArgument(0, List.class));
     }
 
-    public List<Token> getTokens(String id, int amount) throws ExecutionException, InterruptedException {
+    public List<TokenResult> getTokens(String id, int amount) throws ExecutionException, InterruptedException {
         tokens = new CompletableFuture<>();
         queue.publish(new Event("TokensRequested", id, amount));
         return tokens.get();

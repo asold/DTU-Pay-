@@ -29,7 +29,6 @@ public class PaymentFacade {
     }
 
     private void policyPaymentProcessed(Event event) {
-        event.
         paymentResponse.complete(event.getArgument(0, PaymentResponse.class));
     }
 

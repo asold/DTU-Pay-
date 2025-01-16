@@ -4,13 +4,16 @@ import dk.dtu.businesslogic.exceptions.DuplicateTokenUUIDException;
 import dk.dtu.businesslogic.exceptions.InvalidTokenException;
 import dk.dtu.businesslogic.exceptions.TokenNotFoundException;
 import dk.dtu.businesslogic.models.Token;
+import dk.dtu.businesslogic.models.TokenResult;
 import dk.dtu.businesslogic.repositories.TokenRepository;
 import messaging.Event;
 import messaging.MessageQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class TokenService {
 
@@ -84,14 +87,16 @@ public class TokenService {
             if (listTokens.isEmpty()) {
                 generateTokens(customerId, amount);
                 var result = tokenRepository.getUnusedTokensByCustomerId(customerId);
+                List<TokenResult> returnValue = result.stream().map(token -> new TokenResult(token.getTokenId())).toList();
                 System.out.println("publishing user had no tokens");
-                queue.publish(new Event("TokensGenerated", result ));
+                queue.publish(new Event("TokensGenerated", returnValue ));
             }
             else if (amount + listTokens.size() <= 5) {
                 generateTokens(customerId, amount);
                 var result = tokenRepository.getUnusedTokensByCustomerId(customerId);
+                List<TokenResult> returnValue = result.stream().map(token -> new TokenResult(token.getTokenId())).toList();
                 System.out.println("publishing user had some tokens");
-                queue.publish(new Event("TokensGenerated", result));
+                queue.publish(new Event("TokensGenerated", returnValue));
             }
             else {
                 throw new IllegalArgumentException("Number of requested tokens exceeds the limit of allowed tokens");

@@ -36,7 +36,7 @@ public class PaymentSteps {
     private String customerBankAccountNumber;
     private String merchantBankAccountNumber;
 
-    private List<Token> customerTokens;
+    private List<TokenResult> customerTokens;
     private PaymentResponse paymentResponse;
 
     @Given("a customer with name {string}, last name {string}, and CPR {string}")
@@ -101,8 +101,8 @@ public class PaymentSteps {
 
     @When("the merchant initiates a payment for {int} kr using the customer's token")
     public void theMerchantInitiatesAPaymentForKrUsingTheCustomerSToken(int amount) {
-        Token randomTokenFromCustomerList = customerTokens.get(new Random().nextInt(customerTokens.size()));
-        Payment payment = new Payment(dtuPayMerchant.getId(), randomTokenFromCustomerList.token(), new BigDecimal(amount));
+        TokenResult randomTokenFromCustomerList = customerTokens.get(new Random().nextInt(customerTokens.size()));
+        Payment payment = new Payment(dtuPayMerchant.getId(), randomTokenFromCustomerList.tokenId(), new BigDecimal(amount));
 
         paymentResponse = paymentAdapter.requestPayment(payment);
     }
@@ -136,7 +136,7 @@ public class PaymentSteps {
                 bankService.retireAccount(customerAccount.getId());
             }
 
-            Account merchantAccount = bankService.getAccountByCprNumber("241902-7250");
+            Account merchantAccount = bankService.getAccountByCprNumber("241902-7253");
             if (merchantAccount != null) {
                 bankService.retireAccount(merchantAccount.getId());
             }

@@ -11,4 +11,4 @@ import java.util.UUID;
  */
 @ValueObject
 
-public record Token (UUID token) { }
+public record TokenResult(UUID tokenId) { }
