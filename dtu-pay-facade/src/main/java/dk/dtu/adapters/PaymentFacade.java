@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutionException;
 public class PaymentFacade {
 
     private MessageQueue queue;
+//    private CompletableFuture<PaymentResponse> paymentResponse;
     private CompletableFuture<PaymentResponse> paymentResponse;
 
     public PaymentFacade() {
@@ -24,7 +25,7 @@ public class PaymentFacade {
 
     public PaymentFacade(MessageQueue q) {
         queue = q;
-        q.addHandler("PaymentSucceeded", this::policyPaymentSucceeded);
+        q.addHandler("PaymentProcessed", this::policyPaymentSucceeded);
     }
 
     private void policyPaymentSucceeded(Event event) {

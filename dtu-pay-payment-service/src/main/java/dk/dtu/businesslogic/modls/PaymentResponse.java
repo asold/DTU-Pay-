@@ -1,4 +1,4 @@
-package dk.dtu.core.models;
+package dk.dtu.businesslogic.modls;
 
 import org.jmolecules.ddd.annotation.ValueObject;
 
