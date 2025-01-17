@@ -176,4 +176,37 @@ public class PaymentSteps {
 
     }
 
+    @Then("the payment is not successful")
+    public void thePaymentIsNotSuccessful() {
+        
+    }
+
+    @And("the customer has no valid tokens from DTU Pay")
+    public void theCustomerHasNoValidTokensFromDTUPay() {
+        
+    }
+
+    @And("the customer is not registered with the bank")
+    public void theCustomerIsNotRegisteredWithTheBank() {
+        
+    }
+
+    @And("an error message {string} is returned")
+    public void anErrorMessageIsReturned(String arg0) {
+        
+    }
+
+    @And("the merchant is not registered with the bank")
+    public void theMerchantIsNotRegisteredWithTheBank() {
+        
+    }
+
+    @And("the error message {string} is returned")
+    public void theErrorMessageIsReturned(String arg0) {
+        
+    }
+
+    @And("the merchant is not registered with Simple DTU Pay using their bank account")
+    public void theMerchantIsNotRegisteredWithSimpleDTUPayUsingTheirBankAccount() {
+    }
 }
