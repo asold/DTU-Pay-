@@ -2,11 +2,14 @@ package dk.dtu.adapters;
 
 import dk.dtu.core.models.Customer;
 import jakarta.inject.Singleton;
+import messaging.CorrelationId;
 import messaging.Event;
 import messaging.MessageQueue;
 import messaging.implementations.RabbitMqQueue;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -15,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 @Singleton
 public class CustomerFacade {
 
-    CompletableFuture<String> customerId;
+    private Map<CorrelationId, CompletableFuture<String>> registerCustomerRequests = new ConcurrentHashMap<>();
 
     MessageQueue queue;
 
@@ -30,12 +33,16 @@ public class CustomerFacade {
 
     private void policyCustomerRegistered(Event e) {
         System.out.println("Policy customer registered");
-        customerId.complete(e.getArgument(0, String.class));
+        CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
+        String customerId = e.getArgument(1, String.class);
+        registerCustomerRequests.get(correlationId).complete(customerId);
     }
 
     public String registerCustomer(Customer customer) throws InterruptedException, ExecutionException {
-        customerId = new CompletableFuture<>();
-        queue.publish(new Event("CustomerAccountRegistrationRequested", customer));
-        return customerId.get();
+        CorrelationId correlationId = new CorrelationId();
+        CompletableFuture<String> registerCustomerRequest = new CompletableFuture<>();
+        registerCustomerRequests.put(correlationId, registerCustomerRequest);
+        queue.publish(new Event("CustomerAccountRegistrationRequested",correlationId, customer));
+        return registerCustomerRequest.get();
     }
 }

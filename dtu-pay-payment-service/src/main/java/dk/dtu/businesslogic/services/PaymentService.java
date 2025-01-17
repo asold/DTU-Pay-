@@ -2,20 +2,26 @@ package dk.dtu.businesslogic.services;
 
 import dk.dtu.businesslogic.models.PaymentResponse;
 import dtu.ws.fastmoney.BankServiceException_Exception;
+import messaging.CorrelationId;
 import messaging.Event;
 import messaging.MessageQueue;
 import messaging.implementations.RabbitMqQueue;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.BankServiceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public final class PaymentService {
 
+    private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
     private final MessageQueue queue;
-    private HashMap<UUID, CreatePaymentCommand> pendingPaymentCommandsMap;
+    private ConcurrentHashMap<CorrelationId, CreatePaymentCommand> pendingPaymentCommandsMap;
     private final BankService bankService = new BankServiceService().getBankServicePort();
 
     public PaymentService() {
@@ -27,12 +33,12 @@ public final class PaymentService {
         queue.addHandler("PaymentRequested", this::paymentRequestedPolicy);
         queue.addHandler("CustomerBankAccountRetrieved", this::customerBankAccountRetrievedEventHandler);
         queue.addHandler("MerchantBankAccountRetrieved", this::merchantBankAccountRetrievedEventHandler);
-        pendingPaymentCommandsMap = new HashMap<>();
+        pendingPaymentCommandsMap = new ConcurrentHashMap<>();
     }
 
     private void paymentRequestedPolicy(Event event) {
         var amount = event.getArgument(3, BigDecimal.class);
-        var correlationId = event.getArgument(0, UUID.class);
+        var correlationId = event.getArgument(0, CorrelationId.class);
         // Retrieve or create a new payment command
         var paymentCommand = pendingPaymentCommandsMap.computeIfAbsent(correlationId, k -> new CreatePaymentCommand());
         paymentCommand.setAmount(amount);
@@ -41,7 +47,7 @@ public final class PaymentService {
 
     private void customerBankAccountRetrievedEventHandler(Event event) {
         var customerBankAccount = event.getArgument(1, String.class);
-        var correlationId = event.getArgument(0, UUID.class);
+        var correlationId = event.getArgument(0, CorrelationId.class);
         // Retrieve or create a new payment command
         var paymentCommand = pendingPaymentCommandsMap.computeIfAbsent(correlationId, k -> new CreatePaymentCommand());
         paymentCommand.setCustomerBankAccountId(customerBankAccount);
@@ -50,14 +56,14 @@ public final class PaymentService {
 
     private void merchantBankAccountRetrievedEventHandler(Event event) {
         var merchantBankAccount = event.getArgument(1, String.class);
-        var correlationId = event.getArgument(0, UUID.class);
+        var correlationId = event.getArgument(0, CorrelationId.class);
         // Retrieve or create a new payment command
         var paymentCommand = pendingPaymentCommandsMap.computeIfAbsent(correlationId, k -> new CreatePaymentCommand());
         paymentCommand.setMerchantBankAccountId(merchantBankAccount);
         executePaymentIfAllEventsArrived(correlationId);
     }
 
-    private void executePaymentIfAllEventsArrived(UUID correlationId) {
+    private void executePaymentIfAllEventsArrived(CorrelationId correlationId) {
         // Verify if all events were received
         var paymentCommand = pendingPaymentCommandsMap.get(correlationId);
         if (paymentCommand.getCustomerBankAccountId() != null && paymentCommand.getMerchantBankAccountId() != null && paymentCommand.getAmount() != null)
@@ -70,14 +76,15 @@ public final class PaymentService {
                 bankService.transferMoneyFromTo(paymentCommand.getCustomerBankAccountId(), paymentCommand.getMerchantBankAccountId(), paymentCommand.getAmount(), paymentDescription);
                 // Because we took the payment id as the correlation id, we publish an event stating that
                 // the payment was successful for that correlation id, which effectively can be interpreted as a payment id.
-                var paymentResponse = new PaymentResponse(correlationId, true);
-                var paymentSucceededEvent = new Event("PaymentProcessed", paymentResponse);
+                var paymentResponse = new PaymentResponse(correlationId.getId(), true);
+                var paymentSucceededEvent = new Event("PaymentProcessed", correlationId, paymentResponse);
                 queue.publish(paymentSucceededEvent);
             } catch (BankServiceException_Exception e)
             {
-                var paymentResponse = new PaymentResponse(correlationId,false);
-                var paymentSucceededEvent = new Event("PaymentProcessed", paymentResponse);
-                throw new RuntimeException(e);
+                var paymentResponse = new PaymentResponse(correlationId.getId(),false);
+                var paymentFailureEvent = new Event("PaymentProcessed",correlationId, paymentResponse);
+                queue.publish(paymentFailureEvent);
+                log.error(e.toString(), e);
             }
 
             // Here we make sure to clean any information related to the payment saga.

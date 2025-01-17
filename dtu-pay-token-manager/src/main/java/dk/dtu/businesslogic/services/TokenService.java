@@ -6,6 +6,7 @@ import dk.dtu.businesslogic.exceptions.TokenNotFoundException;
 import dk.dtu.businesslogic.models.Token;
 import dk.dtu.businesslogic.models.TokenResult;
 import dk.dtu.businesslogic.repositories.TokenRepository;
+import messaging.CorrelationId;
 import messaging.Event;
 import messaging.MessageQueue;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class TokenService {
     }
 
     private void policyPaymentRequested(Event event) {
-        UUID correlationId = event.getArgument(0, UUID.class);
+        CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
         UUID token = event.getArgument(1, UUID.class);
         try{
             String customerId = validateToken(token);
@@ -70,16 +71,18 @@ public class TokenService {
     }
 
     private void policyTokensRequested(Event event) {
-        var customerId = event.getArgument(0, String.class);
-        var amount = event.getArgument(1, Integer.class);
+        CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+        var customerId = event.getArgument(1, String.class);
+        var amount = event.getArgument(2, Integer.class);
         try {
-            getTokens(customerId, amount);
+            List<TokenResult> lstTokens = getTokens(customerId, amount);
+            queue.publish(new Event("TokensGenerated", correlationId, lstTokens));
         } catch (DuplicateTokenUUIDException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void getTokens(String customerId, int amount) throws DuplicateTokenUUIDException {
+    public List<TokenResult> getTokens(String customerId, int amount) throws DuplicateTokenUUIDException {
         //Customer can only have at most 6 tokens
         //Customer can only request 1 to 5 tokens
         var listTokens = tokenRepository.getUnusedTokensByCustomerId(customerId);
@@ -87,14 +90,12 @@ public class TokenService {
             if (listTokens.isEmpty()) {
                 generateTokens(customerId, amount);
                 var result = tokenRepository.getUnusedTokensByCustomerId(customerId);
-                List<TokenResult> returnValue = result.stream().map(token -> new TokenResult(token.getTokenId())).toList();
-                queue.publish(new Event("TokensGenerated", returnValue ));
+                return result.stream().map(token -> new TokenResult(token.getTokenId())).toList();
             }
             else if (amount + listTokens.size() <= 5) {
                 generateTokens(customerId, amount);
                 var result = tokenRepository.getUnusedTokensByCustomerId(customerId);
-                List<TokenResult> returnValue = result.stream().map(token -> new TokenResult(token.getTokenId())).toList();
-                queue.publish(new Event("TokensGenerated", returnValue));
+                return result.stream().map(token -> new TokenResult(token.getTokenId())).toList();
             }
             else {
                 throw new IllegalArgumentException("Number of requested tokens exceeds the limit of allowed tokens");

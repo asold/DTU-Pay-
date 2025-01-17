@@ -7,14 +7,14 @@ mvn clean install -f messaging-utilities/pom.xml
 for service in messaging-utilities dtu-pay-account-manager dtu-pay-facade dtu-pay-payment-service dtu-pay-report-service dtu-pay-token-manager; do
     echo "Building $service..."
     cd $service
-    mvn package
+    mvn clean package
     cd ..
 done
 
 # Build and start Docker containers
-docker compose build
+docker compose build --no-cache
 docker compose up -d
-sleep 2
+sleep 5
 
 # Navigate to the client directory
 cd dtu-pay-client

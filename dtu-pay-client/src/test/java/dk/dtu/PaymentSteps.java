@@ -11,6 +11,7 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.junit.Assert;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -38,6 +39,10 @@ public class PaymentSteps {
 
     private List<TokenResult> customerTokens;
     private PaymentResponse paymentResponse;
+
+    private Payment payment;
+
+    private TokenResult randomTokenFromCustomerList;
 
     @Given("a customer with name {string}, last name {string}, and CPR {string}")
     public void aCustomerWithNameLastNameAndCPR(String firstName, String lastName, String cpr) {
@@ -102,8 +107,8 @@ public class PaymentSteps {
 
     @When("the merchant initiates a payment for {int} kr using the customer's token")
     public void theMerchantInitiatesAPaymentForKrUsingTheCustomerSToken(int amount) {
-        TokenResult randomTokenFromCustomerList = customerTokens.get(new Random().nextInt(customerTokens.size()));
-        Payment payment = new Payment(dtuPayMerchant.getId(), randomTokenFromCustomerList.tokenId(), new BigDecimal(amount));
+        randomTokenFromCustomerList = customerTokens.get(new Random().nextInt(customerTokens.size()));
+        payment = new Payment(dtuPayMerchant.getId(), randomTokenFromCustomerList.tokenId(), new BigDecimal(amount));
 
         paymentResponse = paymentAdapter.requestPayment(payment);
     }
@@ -112,20 +117,23 @@ public class PaymentSteps {
     public void thePaymentIsSuccessful() {
         assertTrue(paymentResponse.successful());
     }
-//
-//    @And("the balance of the customer at the bank is {int} kr")
-//    public void theBalanceOfTheCustomerAtTheBankIsKr(int arg0) {
-//
-//    }
-//
-//    @And("the balance of the merchant at the bank is {int} kr")
-//    public void theBalanceOfTheMerchantAtTheBankIsKr(int arg0) {
-//
-//    }
-//
-//    @And("the customer's token is no longer valid")
-//    public void theCustomerSTokenIsNoLongerValid() {
-//    }
+
+    @And("the balance of the customer at the bank is {int} kr")
+    public void theBalanceOfTheCustomerAtTheBankIsKr(int balance) throws BankServiceException_Exception {
+        Account customerAccount = bankService.getAccount(customerBankAccountNumber);
+        Assert.assertEquals(new BigDecimal(balance).setScale(4), customerAccount.getBalance().setScale(4));
+    }
+
+    @And("the balance of the merchant at the bank is {int} kr")
+    public void theBalanceOfTheMerchantAtTheBankIsKr(int balance) throws BankServiceException_Exception {
+        Account merchantAccount = bankService.getAccount(merchantBankAccountNumber);
+        Assert.assertEquals(new BigDecimal(balance).setScale(4), merchantAccount.getBalance().setScale(4));
+    }
+
+    @And("the customer's token is no longer valid")
+    public void theCustomerSTokenIsNoLongerValid() {
+        var response = paymentAdapter.requestPayment(payment);
+    }
 
 
     @Before
@@ -136,14 +144,17 @@ public class PaymentSteps {
             if (customerAccount != null) {
                 bankService.retireAccount(customerAccount.getId());
             }
-
+        }catch(BankServiceException_Exception e) {
+            System.err.println(e.getMessage());
+        }
+        try{
             Account merchantAccount = bankService.getAccountByCprNumber("241902-7253");
             if (merchantAccount != null) {
                 bankService.retireAccount(merchantAccount.getId());
             }
-        } catch (BankServiceException_Exception e) {
-//            throw new RuntimeException(e);
-            System.out.println(e.getMessage());
+        }
+        catch (BankServiceException_Exception e) {
+            System.err.println(e.getMessage());
         }
     }
     @After
