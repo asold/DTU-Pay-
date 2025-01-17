@@ -53,7 +53,7 @@ public class AccountService {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		var merchant = event.getArgument(1, Merchant.class);
 		var mid = createMerchantAccount(merchant);
-		queue.publish(new Event("CustomerRegistered", correlationId, mid));
+		queue.publish(new Event("MerchantRegistered", correlationId, mid));
 	}
 
 

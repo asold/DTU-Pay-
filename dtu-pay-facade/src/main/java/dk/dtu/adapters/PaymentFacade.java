@@ -46,7 +46,7 @@ public class PaymentFacade {
         String message = event.getArgument(1, String.class);
 
         CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
-        future.completeExceptionally(new RuntimeException(message));
+        future.completeExceptionally(new Exception(message));
         paymentRequests.remove(correlationId);
     }
 
