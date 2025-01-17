@@ -53,7 +53,7 @@ public class AccountService {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		var merchant = event.getArgument(1, Merchant.class);
 		var mid = createMerchantAccount(merchant);
-		queue.publish(new Event("CustomerRegistered", correlationId, mid));
+		queue.publish(new Event("MerchantRegistered", correlationId, mid));
 	}
 
 
@@ -73,7 +73,7 @@ public class AccountService {
 	 * @param event the event
 	 */
 	private void paymentRequested(Event event) {
-		UUID correlationId = event.getArgument(0, UUID.class);
+		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		var merchantId = event.getArgument(2, String.class);
 		retrieveMerchantBankAccount(merchantId, correlationId);
 	}
@@ -121,7 +121,7 @@ public class AccountService {
 	 * @param correlationId the correlation ID
 	 * @throws RuntimeException if there is no merchant with the given ID
 	 */
-	private void retrieveMerchantBankAccount(String merchantId, UUID correlationId) {
+	private void retrieveMerchantBankAccount(String merchantId, CorrelationId correlationId) {
 		var merchantAccount = accountRepository.getMerchantById(merchantId)
 				.orElseThrow(() -> new RuntimeException("Merchant not found"));
 		queue.publish(new Event("MerchantBankAccountRetrieved",correlationId, merchantAccount.getBankAccountNumber()));
