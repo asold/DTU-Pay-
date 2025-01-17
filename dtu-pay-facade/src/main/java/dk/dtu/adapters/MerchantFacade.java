@@ -33,6 +33,7 @@ public class MerchantFacade {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
 
         registerMerchantRequests.get(correlationId).complete(merchantId);
+        registerMerchantRequests.remove(correlationId);
     }
 
     public String registerMerchant(Merchant merchant) throws InterruptedException, ExecutionException {

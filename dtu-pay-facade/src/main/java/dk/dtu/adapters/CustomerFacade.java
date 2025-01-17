@@ -36,6 +36,7 @@ public class CustomerFacade {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         String customerId = e.getArgument(1, String.class);
         registerCustomerRequests.get(correlationId).complete(customerId);
+        registerCustomerRequests.remove(correlationId);
     }
 
     public String registerCustomer(Customer customer) throws InterruptedException, ExecutionException {

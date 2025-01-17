@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 public class PaymentSteps {
@@ -75,6 +76,7 @@ public class PaymentSteps {
     public void theCustomerHasAValidTokenFromDTUPay(int amount) {
         customerTokens = customerAdapter.getTokens(dtuPayCustomer.getId(), amount ); // the customer class has a field for this ->
         dtuPayCustomer.setTokens(customerTokens);
+
     }
 
     @And("a merchant with name {string}, last name {string}, and CPR {string}")
@@ -106,7 +108,7 @@ public class PaymentSteps {
     }
 
     @When("the merchant initiates a payment for {int} kr using the customer's token")
-    public void theMerchantInitiatesAPaymentForKrUsingTheCustomerSToken(int amount) {
+    public void theMerchantInitiatesAPaymentForKrUsingTheCustomerSToken(int amount) throws Exception {
         randomTokenFromCustomerList = customerTokens.get(new Random().nextInt(customerTokens.size()));
         payment = new Payment(dtuPayMerchant.getId(), randomTokenFromCustomerList.tokenId(), new BigDecimal(amount));
 
@@ -131,8 +133,9 @@ public class PaymentSteps {
     }
 
     @And("the customer's token is no longer valid")
-    public void theCustomerSTokenIsNoLongerValid() {
-        var response = paymentAdapter.requestPayment(payment);
+    public void theCustomerSTokenIsNoLongerValid() throws Exception {
+//        var response = paymentAdapter.requestPayment(payment);
+        assertThrows("Invalid Token", Exception.class, () -> paymentAdapter.requestPayment(payment));
     }
 
 
@@ -154,7 +157,7 @@ public class PaymentSteps {
             }
         }
         catch (BankServiceException_Exception e) {
-            System.err.println(e.getMessage());
+            System.out.println(e.getMessage());
         }
     }
     @After

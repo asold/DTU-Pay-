@@ -1,5 +1,6 @@
 package dk.dtu.adapters;
 
+import dk.dtu.core.exceptions.InvalidTokenException;
 import dk.dtu.core.models.Payment;
 import dk.dtu.core.models.PaymentResponse;
 import io.netty.util.concurrent.CompleteFuture;
@@ -46,7 +47,7 @@ public class PaymentFacade {
         String message = event.getArgument(1, String.class);
 
         CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
-        future.completeExceptionally(new Exception(message));
+        future.completeExceptionally(new InvalidTokenException(message));
         paymentRequests.remove(correlationId);
     }
 

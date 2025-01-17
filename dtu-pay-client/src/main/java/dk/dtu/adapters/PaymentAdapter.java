@@ -17,10 +17,14 @@ public final class PaymentAdapter {
 
     private Client client = ClientBuilder.newBuilder().build();
 
-    public PaymentResponse requestPayment(Payment payment) {
+    public PaymentResponse requestPayment(Payment payment) throws Exception {
         Response response = client.target("http://localhost:8082/payments")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.json(payment));
+
+        if(response.getStatus() != Response.Status.OK.getStatusCode()) {
+            throw new Exception(response.readEntity(String.class));
+        }
 
         return response.readEntity(PaymentResponse.class);
     }
