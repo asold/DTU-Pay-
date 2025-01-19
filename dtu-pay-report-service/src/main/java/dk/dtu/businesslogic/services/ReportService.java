@@ -8,6 +8,7 @@ import messaging.Event;
 import messaging.MessageQueue;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -28,6 +29,7 @@ public class ReportService {
 		queue.addHandler("PaymentRequested", this::retrievedMerchantIdAmount);
 		queue.addHandler("TokenValidated", this::retrievedCustomerId);
 		queue.addHandler("PaymentProcessed", this::retrievedPaymentSuccessful);
+		queue.addHandler("CustomerReportRequested", this::retreiveCustomerReport);
 
 		reportRepository = new ReportRepository();
 	}
@@ -70,6 +72,13 @@ public class ReportService {
 			reportRepository.addPaymentLog(pendingPaymentLog);
 			pendingPaymentLogs.remove(correlationId);
 		}
+	}
+
+	private void retreiveCustomerReport(Event event) {
+		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+		String customerId = event.getArgument(1, String.class);
+		List<PaymentLog> paymentLogs = reportRepository.getPaymentLogsByCustomerId(customerId);
+		queue.publish(new Event("CustomerReportGenerated", correlationId, paymentLogs));
 	}
 
 }
