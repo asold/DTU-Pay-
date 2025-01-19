@@ -18,7 +18,7 @@ public class ReportService {
 
 	private MessageQueue queue;
 	private ReportRepository reportRepository;
-	private ConcurrentHashMap<CorrelationId, PaymentLog> pendingPaymentLogs;
+	private ConcurrentHashMap<CorrelationId, PaymentLog> pendingPaymentLogs = new ConcurrentHashMap();
 
 	private static final Logger logger = Logger.getLogger(ReportService.class.getName());
 
