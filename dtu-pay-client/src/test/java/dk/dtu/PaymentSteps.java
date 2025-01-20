@@ -66,8 +66,8 @@ public class PaymentSteps {
         dtuPayCustomer.setBankAccountNumber(customerBankAccountNumber);
     }
 
-    @And("the customer is registered with Simple DTU Pay using their bank account")
-    public void theCustomerIsRegisteredWithSimpleDTUPayUsingTheirBankAccount() {
+    @And("the customer is registered with DTU Pay using their bank account")
+    public void theCustomerIsRegisteredWithDTUPayUsingTheirBankAccount() {
         // Register the customer with DTU Pay
         dtuPayCustomer.setId(customerAdapter.register(dtuPayCustomer));
     }
@@ -100,8 +100,8 @@ public class PaymentSteps {
         dtuPayMerchant.setBankAccountNumber(merchantBankAccountNumber);
     }
 
-    @And("the merchant is registered with Simple DTU Pay using their bank account")
-    public void theMerchantIsRegisteredWithSimpleDTUPayUsingTheirBankAccount() {
+    @And("the merchant is registered with DTU Pay using their bank account")
+    public void theMerchantIsRegisteredWithDTUPayUsingTheirBankAccount() {
         // Register the merchant with DTU Pay
         String merchantId = merchantAdapter.register(dtuPayMerchant);
         dtuPayMerchant.setId(merchantId);
@@ -178,8 +178,8 @@ public class PaymentSteps {
     }
 
 
-    @And("the merchant is not registered with Simple DTU Pay using their bank account")
-    public void theMerchantIsNotRegisteredWithSimpleDTUPayUsingTheirBankAccount() {
+    @And("the merchant is not registered with DTU Pay using their bank account")
+    public void theMerchantIsNotRegisteredWithDTUPayUsingTheirBankAccount() {
         dtuPayMerchant.setId("unregistered-dtuPay-id");
     }
 
