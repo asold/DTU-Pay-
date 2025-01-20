@@ -7,8 +7,6 @@ import messaging.Event;
 import messaging.MessageQueue;
 import messaging.implementations.RabbitMqQueue;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import dtu.ws.fastmoney.BankService;
@@ -19,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 public final class PaymentService {
 
-    private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
     private final MessageQueue queue;
     private ConcurrentHashMap<CorrelationId, CreatePaymentCommand> pendingPaymentCommandsMap;
     private final BankService bankService = new BankServiceService().getBankServicePort();
@@ -36,7 +33,7 @@ public final class PaymentService {
         pendingPaymentCommandsMap = new ConcurrentHashMap<>();
     }
 
-    private void paymentRequestedPolicy(Event event) {
+    public void paymentRequestedPolicy(Event event) {
         var amount = event.getArgument(3, BigDecimal.class);
         var correlationId = event.getArgument(0, CorrelationId.class);
         // Retrieve or create a new payment command
@@ -45,7 +42,7 @@ public final class PaymentService {
         executePaymentIfAllEventsArrived(correlationId);
     }
 
-    private void customerBankAccountRetrievedEventHandler(Event event) {
+    public void customerBankAccountRetrievedEventHandler(Event event) {
         var customerBankAccount = event.getArgument(1, String.class);
         var correlationId = event.getArgument(0, CorrelationId.class);
         // Retrieve or create a new payment command
@@ -54,7 +51,7 @@ public final class PaymentService {
         executePaymentIfAllEventsArrived(correlationId);
     }
 
-    private void merchantBankAccountRetrievedEventHandler(Event event) {
+    public void merchantBankAccountRetrievedEventHandler(Event event) {
         var merchantBankAccount = event.getArgument(1, String.class);
         var correlationId = event.getArgument(0, CorrelationId.class);
         // Retrieve or create a new payment command
@@ -82,11 +79,24 @@ public final class PaymentService {
             } catch (BankServiceException_Exception e)
             {
                 var paymentResponse = new PaymentResponse(correlationId.getId(),false);
-                var paymentFailureEvent = new Event("PaymentProcessed",correlationId, paymentResponse);
-                queue.publish(paymentFailureEvent);
-                log.error(e.toString(), e);
-            }
+                //Maybe the dependency on a text from the bank account is not that good here
+                if(e.getMessage().equals("Debtor account does not exist")){
+                    queue.publish(new Event("DebtorAccountNotFound", correlationId, "DebtorAccountNotFound"));
+                    return;
+                }
+                if(e.getMessage().equals("Creditor account does not exist")){
+                    queue.publish(new Event("CreditorAccountNotFound", correlationId, "CreditorAccountNotFound"));
+                    return;
+                }
+                if(e.getMessage().equals("Amount must be positive")){
+                    queue.publish(new Event("NegativeAmountRequested", correlationId, "NegativeAmountRequested"));
+                    return;
+                }
 
+                var paymentFailureEvent = new Event("PaymentProcessed",correlationId, paymentResponse);
+
+                queue.publish(paymentFailureEvent);
+            }
             // Here we make sure to clean any information related to the payment saga.
             pendingPaymentCommandsMap.remove(correlationId);
         }

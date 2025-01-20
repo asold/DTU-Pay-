@@ -123,7 +123,12 @@ public class AccountService {
 	 */
 	private void retrieveMerchantBankAccount(String merchantId, CorrelationId correlationId) {
 		var merchantAccount = accountRepository.getMerchantById(merchantId)
-				.orElseThrow(() -> new RuntimeException("Merchant not found"));
-		queue.publish(new Event("MerchantBankAccountRetrieved",correlationId, merchantAccount.getBankAccountNumber()));
+				.orElseThrow(() -> {
+					queue.publish(new Event("MerchantAccountNotFound", correlationId, "Merchant not found"));
+					return new RuntimeException("Merchant not found");
+				});
+
+		queue.publish(new Event("MerchantBankAccountRetrieved", correlationId, merchantAccount.getBankAccountNumber()));
 	}
+
 }

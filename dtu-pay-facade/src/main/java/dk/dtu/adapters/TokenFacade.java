@@ -1,7 +1,7 @@
 package dk.dtu.adapters;
 
+import com.google.gson.reflect.TypeToken;
 import dk.dtu.core.models.TokenResult;
-import io.cucumber.messages.internal.com.google.common.reflect.TypeToken;
 import jakarta.inject.Singleton;
 import messaging.CorrelationId;
 import messaging.Event;
