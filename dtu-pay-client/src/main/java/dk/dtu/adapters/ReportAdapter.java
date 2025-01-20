@@ -1,10 +1,8 @@
 package dk.dtu.adapters;
 
-import dk.dtu.core.models.Customer;
-import dk.dtu.core.models.TokenResult;
+import dk.dtu.core.models.PaymentLog;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
-import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -18,14 +16,14 @@ public class ReportAdapter {
     /** Author Karrar Adam s230432
      */
 
-    public List<TokenResult> getCustomerReport(String id) {
+    public List<PaymentLog> getCustomerReport(String id) {
         Response response = client.target("http://localhost:8082/Reports/" + id)
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
-        List<TokenResult> receivedTokens = response.readEntity(new GenericType<List<TokenResult>>() {});
+        List<PaymentLog> receivedPaymentLogs = response.readEntity(new GenericType<List<PaymentLog>>() {});
 
-        return receivedTokens;
+        return receivedPaymentLogs;
     }
 
 }

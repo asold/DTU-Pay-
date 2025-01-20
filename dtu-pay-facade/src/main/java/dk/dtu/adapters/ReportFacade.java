@@ -5,7 +5,6 @@ package dk.dtu.adapters;
  */
 
 import dk.dtu.core.models.PaymentLog;
-import dk.dtu.core.models.TokenResult;
 import io.cucumber.messages.internal.com.google.common.reflect.TypeToken;
 import jakarta.inject.Singleton;
 import messaging.CorrelationId;
@@ -18,12 +17,12 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-
+@Singleton
 public class ReportFacade {
 
 
 
-        private Map<CorrelationId, CompletableFuture<List<TokenResult>>> ReportRequests = new ConcurrentHashMap<>();
+        private Map<CorrelationId, CompletableFuture<List<PaymentLog>>> ReportRequests = new ConcurrentHashMap<>();
 
         private final MessageQueue queue;
 
@@ -39,32 +38,32 @@ public class ReportFacade {
         private void policyReportGenerated(Event e){
             // This is done for serialization
             Type listType = new TypeToken<List<PaymentLog>>() {}.getType();
-            List<TokenResult> paymentLogs = e.getArgument(1, listType);
+            List<PaymentLog> paymentLogs = e.getArgument(1, listType);
             CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
-            CompletableFuture<List<TokenResult>> future = ReportRequests.get(correlationId);
+            CompletableFuture<List<PaymentLog>> future = ReportRequests.get(correlationId);
             future.complete(paymentLogs);
             ReportRequests.remove(correlationId);
         }
 
-            public List<TokenResult> getCustomerPaymentLogs(String id) throws ExecutionException, InterruptedException {
+            public List<PaymentLog> getCustomerPaymentLogs(String id) throws ExecutionException, InterruptedException {
             CorrelationId correlationId = new CorrelationId();
-            CompletableFuture<List<TokenResult>> paymentLogs = new CompletableFuture<>();
+            CompletableFuture<List<PaymentLog>> paymentLogs = new CompletableFuture<>();
             ReportRequests.put(correlationId, paymentLogs);
             queue.publish(new Event("CustomerReportRequested",correlationId, id ));
             return paymentLogs.get();
         }
 
-        public List<TokenResult> getMerchantPaymentLogs(String id) throws ExecutionException, InterruptedException {
+        public List<PaymentLog> getMerchantPaymentLogs(String id) throws ExecutionException, InterruptedException {
             CorrelationId correlationId = new CorrelationId();
-            CompletableFuture<List<TokenResult>> paymentLogs = new CompletableFuture<>();
+            CompletableFuture<List<PaymentLog>> paymentLogs = new CompletableFuture<>();
             ReportRequests.put(correlationId, paymentLogs);
             queue.publish(new Event("MerchantReportRequested",correlationId, id ));
             return paymentLogs.get();
         }
 
-        public List<TokenResult> getManagerPaymentLogs() throws ExecutionException, InterruptedException {
+        public List<PaymentLog> getManagerPaymentLogs() throws ExecutionException, InterruptedException {
             CorrelationId correlationId = new CorrelationId();
-            CompletableFuture<List<TokenResult>> paymentLogs = new CompletableFuture<>();
+            CompletableFuture<List<PaymentLog>> paymentLogs = new CompletableFuture<>();
             ReportRequests.put(correlationId, paymentLogs);
             queue.publish(new Event("ManagerReportRequested",correlationId));
             return paymentLogs.get();

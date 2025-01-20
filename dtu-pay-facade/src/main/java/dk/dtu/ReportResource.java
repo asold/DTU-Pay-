@@ -1,8 +1,7 @@
 package dk.dtu;
 
 import dk.dtu.adapters.ReportFacade;
-import dk.dtu.adapters.TokenFacade;
-import dk.dtu.core.models.TokenResult;
+import dk.dtu.core.models.PaymentLog;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -22,20 +21,20 @@ public class ReportResource {
     @GET
     @Path("{id}")
     public Response getCustomerReport(@PathParam("id") String id) throws ExecutionException, InterruptedException {
-        List<TokenResult> customerReport = reportFacade.getCustomerPaymentLogs(id);
+        List<PaymentLog> customerReport = reportFacade.getCustomerPaymentLogs(id);
         return Response.ok(customerReport).build();
     }
 
     @GET
     @Path("{id}")
     public Response getMerchantReport(@PathParam("id") String id) throws ExecutionException, InterruptedException {
-        List<TokenResult> merchantReport = reportFacade.getMerchantPaymentLogs(id);
+        List<PaymentLog> merchantReport = reportFacade.getMerchantPaymentLogs(id);
         return Response.ok(merchantReport).build();
     }
 
     @GET
     public Response getManagerReport() throws ExecutionException, InterruptedException {
-        List<TokenResult> customerReport = reportFacade.getManagerPaymentLogs();
+        List<PaymentLog> customerReport = reportFacade.getManagerPaymentLogs();
         return Response.ok(customerReport).build();
     }
 
