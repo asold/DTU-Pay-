@@ -161,7 +161,7 @@ public class AccountService {
 	public void retrieveCustomerBankAccount(String customerId, CorrelationId correlationId) {
 		var customerAccount = accountRepository.getCustomerById(customerId)
 				.orElseThrow(() -> new RuntimeException("Customer not found"));
-		queue.publish(new Event("CustomerBankAccountRetrieved", correlationId ,customerAccount.getBankAccountNumber()));
+		queue.publish(new Event("CustomerBankAccountRetrieved", correlationId, customerAccount.getBankAccountNumber()));
 	}
 
 	/**

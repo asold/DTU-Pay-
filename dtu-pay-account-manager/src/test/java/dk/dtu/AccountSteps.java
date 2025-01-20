@@ -13,8 +13,7 @@ import messaging.MessageQueue;
 import org.mockito.ArgumentCaptor;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class AccountSteps {
 
@@ -30,6 +29,7 @@ public class AccountSteps {
     private Event deregisterCustomerEvent;
     private Event deregisterMerchantEvent;
     private Event tokenValidatedEvent;
+    private Event paymentRequestedEvent;
 
     @Given("a customer first name is {string} and the last name {string} and the cpr is {string} and the account number is {string}")
     public void aCustomerFirstNameIsAndTheLastNameAndTheCprIsAndTheAccountNumberIs(String firstName, String lastName, String cpr, String accountNumber) {
@@ -40,8 +40,17 @@ public class AccountSteps {
         this.customer.setBankAccountNumber(accountNumber);
     }
 
-    @Given("an event called {string}")
-    public void anEventCalled(String eventName) {
+    @Given("a merchant first name is {string} and the last name {string} and the cpr is {string} and the account number is {string}")
+    public void aMerchantFirstNameIsAndTheLastNameAndTheCprIsAndTheAccountNumberIs(String firstName, String lastName, String cpr, String accountNumber) {
+        merchant = new Merchant();
+        merchant.setFirstName(firstName);
+        merchant.setLastName(lastName);
+        merchant.setCpr(cpr);
+        merchant.setBankAccountNumber(accountNumber);
+    }
+
+    @And("an event called {string} received")
+    public void anEventCalledReceived(String eventName) {
         switch (eventName) {
             case "CustomerAccountRegistrationRequested":
                 registerCustomerEvent = new Event(eventName, correlationId, customer);
@@ -57,10 +66,13 @@ public class AccountSteps {
                 break;
             case "TokenValidated":
                 tokenValidatedEvent = new Event(eventName, correlationId, customer.getId());
+                break;
+            case "PaymentRequested":
+                paymentRequestedEvent = new Event(eventName, correlationId, "some argument", merchant.getId());
+                break;
 
         }
     }
-
 
     @When("the {string} is handled")
     public void theIsHandled(String eventName) {
@@ -77,6 +89,11 @@ public class AccountSteps {
             case "MerchantAccountDeregistrationRequested":
                 accountService.policyMerchantDeregistrationRequested(this.deregisterMerchantEvent);
                 break;
+            case "TokenValidated":
+                accountService.tokenValidated(this.tokenValidatedEvent);
+                break;
+            case "PaymentRequested":
+                accountService.paymentRequested(this.paymentRequestedEvent);
         }
 
     }
@@ -89,10 +106,17 @@ public class AccountSteps {
         Event capturedEvent = captor1.getValue();
 
         switch (eventName) {
-            case "CustomerRegistered", "MerchantRegistered":
+            case "CustomerRegistered":
                 assertEquals(eventName, capturedEvent.getTopic());
                 assertEquals(correlationId, capturedEvent.getArgument(0, CorrelationId.class));
-                assertNotNull(capturedEvent.getArgument(1, String.class));
+                this.customer.setId(capturedEvent.getArgument(1, String.class));
+                assertNotNull(this.customer.getId());
+                break;
+            case "MerchantRegistered":
+                assertEquals(eventName, capturedEvent.getTopic());
+                assertEquals(correlationId, capturedEvent.getArgument(0, CorrelationId.class));
+                this.merchant.setId(capturedEvent.getArgument(1, String.class));
+                assertNotNull(this.merchant.getId());
                 break;
             case "CustomerRegistrationFailed", "MerchantRegistrationFailed":
                 assertEquals(eventName, capturedEvent.getTopic());
@@ -102,21 +126,18 @@ public class AccountSteps {
             case "CustomerDeregistered", "MerchantDeregistered":
                 assertEquals(eventName, capturedEvent.getTopic());
                 assertEquals(correlationId, capturedEvent.getArgument(0, CorrelationId.class));
+                break;
+            case "CustomerBankAccountRetrieved":
+                assertEquals(eventName, capturedEvent.getTopic());
+                assertEquals(correlationId, capturedEvent.getArgument(0, CorrelationId.class));
+                assertEquals(customer.getBankAccountNumber(), capturedEvent.getArgument(1, String.class));
+                break;
+            case "MerchantBankAccountRetrieved":
+                assertEquals(eventName, capturedEvent.getTopic());
+                assertEquals(correlationId, capturedEvent.getArgument(0, CorrelationId.class));
+                assertEquals(merchant.getBankAccountNumber(), capturedEvent.getArgument(1, String.class));
+                break;
         }
-    }
-
-    @Given("a merchant first name is {string} and the last name {string} and the cpr is {string} and the account number is {string}")
-    public void aMerchantFirstNameIsAndTheLastNameAndTheCprIsAndTheAccountNumberIs(String firstName, String lastName, String cpr, String accountNumber) {
-        merchant = new Merchant();
-        merchant.setFirstName(firstName);
-        merchant.setLastName(lastName);
-        merchant.setCpr(cpr);
-        merchant.setBankAccountNumber(accountNumber);
-    }
-
-    @And("the customer is registered")
-    public void theCustomerIsRegistered() {
-        registerCustomerEvent = new Event("CustomerAccountRegistrationRequested", correlationId, customer);
-        accountService.policyCustomerRegistrationRequested(this.registerCustomerEvent);
+        reset(queue);
     }
 }
