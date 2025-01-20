@@ -210,11 +210,7 @@ public class ReportSteps {
         receivedLogs = reportAdapter.getManagerReport();
 
     }
-    //Scenario: Report generation fails when initiated by an invalid merchant
-    @Given("a merchant not registered in DTUPay")
-    public void aMerchantNotRegisteredInDTUPay() {
 
-    }
 
 
 

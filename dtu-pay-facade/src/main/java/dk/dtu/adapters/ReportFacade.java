@@ -32,7 +32,7 @@ public class ReportFacade {
 
         public ReportFacade(RabbitMqQueue q) {
             queue = q;
-            q.addHandler("CustomerReportGenerated", this::policyReportGenerated);
+            q.addHandler("ReportGenerated", this::policyReportGenerated);
         }
 
         private void policyReportGenerated(Event e){

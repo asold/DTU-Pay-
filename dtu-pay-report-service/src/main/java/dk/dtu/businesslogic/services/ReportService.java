@@ -80,20 +80,20 @@ public class ReportService {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		String customerId = event.getArgument(1, String.class);
 		List<PaymentLog> paymentLogs = reportRepository.getPaymentLogsByCustomerId(customerId);
-		queue.publish(new Event("CustomerReportGenerated", correlationId, paymentLogs));
+		queue.publish(new Event("ReportGenerated", correlationId, paymentLogs));
 	}
 
 	private void retrieveMerchantReport(Event event) {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		String merchantId = event.getArgument(1, String.class);
 		List<PaymentLog> paymentLogs = reportRepository.getPaymentLogsByMerchantId(merchantId);
-		queue.publish(new Event("MerchantReportGenerated", correlationId, paymentLogs));
+		queue.publish(new Event("ReportGenerated", correlationId, paymentLogs));
 	}
 
 	private void retrieveManagerReport(Event event) {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		List<PaymentLog> paymentLogs = reportRepository.getPaymentLogs();
-		queue.publish(new Event("ManagerReportGenerated", correlationId, paymentLogs));
+		queue.publish(new Event("ReportGenerated", correlationId, paymentLogs));
 	}
 
 }
