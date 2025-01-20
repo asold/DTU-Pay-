@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutionException;
 public class ReportResouce {
 
 
-
     @Path("/reports")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -32,3 +31,4 @@ public class ReportResouce {
             return Response.ok(customerTokens).build();
         }
     }
+}
