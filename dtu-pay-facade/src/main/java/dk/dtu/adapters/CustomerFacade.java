@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 @Singleton
 public class CustomerFacade {
 
-    private Map<CorrelationId, CompletableFuture<String>> registerCustomerRequests = new ConcurrentHashMap<>();
+    private final Map<CorrelationId, CompletableFuture<String>> registerCustomerRequests = new ConcurrentHashMap<>();
 
     MessageQueue queue;
 
@@ -43,7 +43,7 @@ public class CustomerFacade {
         CorrelationId correlationId = new CorrelationId();
         CompletableFuture<String> registerCustomerRequest = new CompletableFuture<>();
         registerCustomerRequests.put(correlationId, registerCustomerRequest);
-        queue.publish(new Event("CustomerAccountRegistrationRequested",correlationId, customer));
+        queue.publish(new Event("CustomerAccountRegistrationRequested", correlationId, customer));
         return registerCustomerRequest.get();
     }
 }

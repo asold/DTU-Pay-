@@ -16,10 +16,8 @@ import org.junit.Assert;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class PaymentSteps {
 
@@ -44,6 +42,10 @@ public class PaymentSteps {
     private Payment payment;
 
     private TokenResult randomTokenFromCustomerList;
+
+    // Account
+
+    private String dtuPayCustomerAccountRegisterResult;
 
     @Given("a customer with name {string}, last name {string}, and CPR {string}")
     public void aCustomerWithNameLastNameAndCPR(String firstName, String lastName, String cpr) {
@@ -208,5 +210,22 @@ public class PaymentSteps {
 
     @And("the merchant is not registered with Simple DTU Pay using their bank account")
     public void theMerchantIsNotRegisteredWithSimpleDTUPayUsingTheirBankAccount() {
+    }
+
+    // Account tests
+
+    @When("the customer registers with DTUPay")
+    public void theCustomerRegistersWithDTUPay() {
+        dtuPayCustomerAccountRegisterResult = customerAdapter.register(dtuPayCustomer);
+    }
+
+    @Then("the registration is successful")
+    public void theRegistrationIsSuccessful() {
+        assertNotEquals(null, dtuPayCustomerAccountRegisterResult);
+    }
+
+    @And("the customer id is returned from DTUPay")
+    public void theCustomerIdIsReturnedFromDTUPay() {
+        //assertEquals(dtuPayCustomer.getId(), );
     }
 }

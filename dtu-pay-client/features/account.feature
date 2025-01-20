@@ -4,7 +4,7 @@ Feature: Account Feature
     Given a customer with name "Susan", last name "Baldwin", and CPR "250103-7220"
     And the customer is registered with the bank with an initial balance of 1000 kr
     When the customer registers with DTUPay
-    Then the registration is succesfull
+    Then the registration is successful
     And the customer id is returned from DTUPay
 
   Scenario: Successful customer deregistration on DTUPay
