@@ -3,21 +3,17 @@ package behaviourtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
-
-import com.google.gson.reflect.TypeToken;
+import org.junit.jupiter.api.Test;
 
 import messaging.Event;
+import messaging.MessageQueue;
 import messaging.implementations.MessageQueueAsync;
-import messaging.implementations.RabbitMqQueue;
 
-public class TestMessageQueue {
+public class TestMessageQueue extends TestUtilities {
 
 	@Test
 	public void testPublishSubscribe() {
@@ -93,56 +89,32 @@ public class TestMessageQueue {
 									// handler for topic "two".
 	}
 
-	private void sleep(int milliseconds) {
-		try {
-			Thread.sleep(milliseconds);
-		} catch (InterruptedException e1) {
-		}
-	}
-
-	// @Test // Only works when using RabbitMq
-	public void testTopicMatching() {
-		var q = new RabbitMqQueue();
-		var s = new HashSet<String>();
-		q.addHandler("one.*", e -> {
-			s.add(e.getTopic());
-		});
-		q.publish(new Event("one.one"));
-		q.publish(new Event("one.two"));
-		sleep(100);
-		var expected = new HashSet<String>();
-		expected.add("one.one");
-		expected.add("one.two");
-		assertEquals(expected, s);
-	}
-	
-	// @Test
-	public void testDeserializationOfLists() throws InterruptedException, ExecutionException {
-		var q = new RabbitMqQueue();
-		CompletableFuture<List<String>> actual = new CompletableFuture<List<String>>();
-		q.addHandler("list", e -> {
-			actual.complete(e.getArgument(0, new TypeToken<List<String>>(){}.getType()));
-		});
-		List<String> expected = new ArrayList<>();
-		expected.add("1");
-		expected.add("2");
-		q.publish(new Event("list", expected));
-		actual.join();
-		assertEquals(expected,actual.get());
-	}
-	
 	@Test
 	public void testDeserializationOfListsInProcessQueue() throws InterruptedException, ExecutionException {
 		var q = new MessageQueueAsync();
-		CompletableFuture<List<String>> actual = new CompletableFuture<List<String>>();
+		bodyTestDeserialisationOfLists(q);
+	}
+	
+	/* Test deserialization using Gson and Java records.
+	 * Gson v 2.8.6 cannot handle records as it requires
+	 * setters for the fields, Gson v 2.11.0 can, because it can
+	 * assign the arguments for the constructor based on the 
+	 * record type.
+	 */
+	@Test
+	public void testGsonDeserializationWithRecords() throws InterruptedException, ExecutionException {
+		var q = new MessageQueueAsync();
+		bodyTestDeserialisationGsonRecords(q);
+	}
+
+	protected void bodyTestDeserialisationGsonRecords(MessageQueue q)
+			throws InterruptedException, ExecutionException {
+		CompletableFuture<Person> actual = new CompletableFuture<Person>();
 		q.addHandler("list", e -> {
-			actual.complete(e.getArgument(0, new TypeToken<List<String>>(){}.getType()));
+			actual.complete(e.getArgument(0, Person.class));
 		});
-		List<String> expected = new ArrayList<>();
-		expected.add("1");
-		expected.add("2");
-		q.publish(new Event("list", expected));
-		actual.join();
-		assertEquals(expected,actual.get());
+		Person expected = new Person("some name", 321);
+		q.publish(new Event("list", new Object[] {expected}));
+		assertEquals(expected,actual.orTimeout(1, TimeUnit.SECONDS).get());
 	}
 }
