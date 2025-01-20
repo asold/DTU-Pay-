@@ -19,23 +19,26 @@ public class ReportResource {
     private ReportFacade reportFacade;
 
     @GET
-    @Path("{id}")
+    @Path("customer/{id}")
     public Response getCustomerReport(@PathParam("id") String id) throws ExecutionException, InterruptedException {
         List<PaymentLog> customerReport = reportFacade.getCustomerPaymentLogs(id);
         return Response.ok(customerReport).build();
     }
 
     @GET
-    @Path("{id}")
+    @Path("merchant/{id}")
     public Response getMerchantReport(@PathParam("id") String id) throws ExecutionException, InterruptedException {
         List<PaymentLog> merchantReport = reportFacade.getMerchantPaymentLogs(id);
         return Response.ok(merchantReport).build();
     }
 
     @GET
+    @Path("manager")
     public Response getManagerReport() throws ExecutionException, InterruptedException {
         List<PaymentLog> customerReport = reportFacade.getManagerPaymentLogs();
         return Response.ok(customerReport).build();
     }
+
+
 
 }

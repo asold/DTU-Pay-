@@ -17,7 +17,26 @@ public class ReportAdapter {
      */
 
     public List<PaymentLog> getCustomerReport(String id) {
-        Response response = client.target("http://localhost:8082/reports/" + id)
+        Response response = client.target("http://localhost:8082/reports/customer/" + id)
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+
+        List<PaymentLog> receivedPaymentLogs = response.readEntity(new GenericType<List<PaymentLog>>() {});
+
+        return receivedPaymentLogs;
+    }
+    public List<PaymentLog> getMerchantReport(String id) {
+        Response response = client.target("http://localhost:8082/reports/merchant/" + id)
+                .request(MediaType.APPLICATION_JSON)
+                .get();
+
+        List<PaymentLog> receivedPaymentLogs = response.readEntity(new GenericType<List<PaymentLog>>() {});
+
+        return receivedPaymentLogs;
+    }
+
+    public List<PaymentLog> getManagerReport() {
+        Response response = client.target("http://localhost:8082/reports/manager" )
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 

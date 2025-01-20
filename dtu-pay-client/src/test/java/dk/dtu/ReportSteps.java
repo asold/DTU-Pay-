@@ -183,21 +183,40 @@ public class ReportSteps {
         receivedLogs = reportAdapter.getCustomerReport(dtuPayCustomer.getId());
     }
 
-
-    @Then("the report with {int} payment is generated successfully")
-    public void theReportWithPaymentIsGeneratedSuccessfully(int arg0) {
-        assertEquals(receivedLogs.size(), arg0);
-
+    @Then("the report with {int} payment\\(s) is generated successfully")
+    public void theReportWithPaymentSIsGeneratedSuccessfully(int arg0) {
+    assertEquals(receivedLogs.size(), arg0);
     }
 
-
-    @And("the report contains the given {int} payment")
-    public void theReportContainsTheGivenPayment(int arg0) {
-        for(int i = 0;  i < arg0; i++){
+    @And("the report contains the given {int} payment\\(s)")
+    public void theReportContainsTheGivenPaymentS(int arg0) {
+        for (int i = 0; i < arg0; i++) {
             PaymentLog log = receivedLogs.get(i);
             assertEquals(log.getCustomerId(), dtuPayCustomer.getId());
             assertEquals(log.getMerchantId(), dtuPayMerchant.getId());
-            assertEquals(log.getAmount().setScale(4), new BigDecimal(10).setScale(4) );
+            assertEquals(log.getAmount().setScale(4), new BigDecimal(10).setScale(4));
         }
+
+   }
+   //Scenario: Successful merchant report generation
+    @When("the merchant requests for a report")
+    public void theMerchantRequestsForAReport() {
+        receivedLogs = reportAdapter.getMerchantReport(dtuPayMerchant.getId());
     }
+
+    // Scenario: Successful manager report generation
+    @When("the manager requests for a report")
+    public void theManagerRequestsForAReport() {
+        receivedLogs = reportAdapter.getManagerReport();
+
+    }
+    //Scenario: Report generation fails when initiated by an invalid merchant
+    @Given("a merchant not registered in DTUPay")
+    public void aMerchantNotRegisteredInDTUPay() {
+
+    }
+
+
+
+
 }
