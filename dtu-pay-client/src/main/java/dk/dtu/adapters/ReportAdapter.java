@@ -17,17 +17,9 @@ public class ReportAdapter {
 
     /** Author Karrar Adam s230432
      */
-    public String register(Customer dtuPayCustomer) {
-        Response response = client.target("http://localhost:8082/customers")
-                .request(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.json(dtuPayCustomer));
 
-        return response.readEntity(String.class);
-    }
-
-    public List<TokenResult> getTokens(String id, int amount) {
-        Response response = client.target("http://localhost:8082/tokens/" + id)
-                .queryParam("amount", amount)
+    public List<TokenResult> getCustomerReport(String id) {
+        Response response = client.target("http://localhost:8082/Reports/" + id)
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
@@ -35,6 +27,5 @@ public class ReportAdapter {
 
         return receivedTokens;
     }
-
 
 }
