@@ -59,10 +59,10 @@ public class AccountSteps {
                 registerMerchantEvent = new Event(eventName, correlationId, merchant);
                 break;
             case "CustomerAccountDeregistrationRequested":
-                deregisterCustomerEvent = new Event(eventName, correlationId, customer);
+                deregisterCustomerEvent = new Event(eventName, correlationId, customer.getId());
                 break;
             case "MerchantAccountDeregistrationRequested":
-                deregisterMerchantEvent = new Event(eventName, correlationId, merchant);
+                deregisterMerchantEvent = new Event(eventName, correlationId, merchant.getId());
                 break;
             case "TokenValidated":
                 tokenValidatedEvent = new Event(eventName, correlationId, customer.getId());

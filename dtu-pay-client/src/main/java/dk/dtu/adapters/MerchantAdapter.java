@@ -21,4 +21,11 @@ public final class MerchantAdapter {
 
         return response.readEntity(String.class);
     }
+
+    public String deregister(String  id) {
+        Response response = client.target("http://localhost:8082/merchants/" + id)
+                .request(MediaType.APPLICATION_JSON)
+                .delete();
+        return response.readEntity(String.class);
+    }
 }

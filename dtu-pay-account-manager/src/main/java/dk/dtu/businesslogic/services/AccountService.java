@@ -73,8 +73,8 @@ public class AccountService {
 	 */
 	public void policyCustomerDeregistrationRequested(Event event) {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
-		var customer = event.getArgument(1, Customer.class);
-		deregisterCustomer(customer);
+		var customerId = event.getArgument(1, String.class);
+		deregisterCustomer(customerId);
 		queue.publish(new Event("CustomerDeregistered", correlationId));
 	}
 
@@ -84,8 +84,8 @@ public class AccountService {
 	 */
 	public void policyMerchantDeregistrationRequested(Event event) {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
-		var merchant = event.getArgument(1, Merchant.class);
-		deregisterMerchant(merchant);
+		var merchantId = event.getArgument(1, String.class);
+		deregisterMerchant(merchantId);
 		queue.publish(new Event("MerchantDeregistered", correlationId));
 	}
 
@@ -138,18 +138,18 @@ public class AccountService {
 
 	/**
 	 * Delete the given customer
-	 * @param customer the customer
+	 * @param customerId the customer ID
 	 */
-	public void deregisterCustomer(Customer customer) {
-		accountRepository.deleteCustomer(customer);
+	public void deregisterCustomer(String customerId) {
+		accountRepository.deleteCustomer(customerId);
 	}
 
 	/**
 	 * Delete the give merchant
-	 * @param merchant the merchant
+	 * @param merchantId the merchant ID
 	 */
-	public void deregisterMerchant(Merchant merchant) {
-		accountRepository.deleteMerchant(merchant);
+	public void deregisterMerchant(String merchantId) {
+		accountRepository.deleteMerchant(merchantId);
 	}
 
 	/**

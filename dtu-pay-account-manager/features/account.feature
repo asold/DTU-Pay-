@@ -82,7 +82,7 @@ Feature: Account
     Then a "CustomerBankAccountRetrieved" event published
 
   Scenario: Successful merchant account retrievement
-    Given a merchant first name is "Bob" and the last name "Fred" and the cpr is "120999-7333" and the account number is "123456789"
+    Given a merchant first name is "Bob" and the last name "Fred" and the cpr is "120999-7319" and the account number is "012345678"
     And an event called "MerchantAccountRegistrationRequested" received
     And the "MerchantAccountRegistrationRequested" is handled
     And a "MerchantRegistered" event published

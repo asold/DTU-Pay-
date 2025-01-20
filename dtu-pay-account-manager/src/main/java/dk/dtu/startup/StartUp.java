@@ -3,16 +3,27 @@ package dk.dtu.startup;
 import dk.dtu.businesslogic.services.AccountService;
 import messaging.implementations.RabbitMqQueue;
 
+import java.util.logging.Logger;
+
 /**
  * @author  Andrei Soldan 243873
  */
 public class StartUp {
 
+	private static final Logger logger = Logger.getLogger(StartUp.class.getName());
+
 	public static void main(String[] args) throws Exception {
+
+		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+			System.err.println("Unhandled exception in thread: " + thread.getName());
+			logger.info("Unhandled exception in thread: " + thread.getName() + " " + throwable.getCause());
+		});
+
 		new StartUp().startUp();
 	}
 
 	private void startUp() throws Exception {
+
 		new AccountService(new RabbitMqQueue("rabbitMq"));
 
 		// Keep the main thread alive to prevent shutdown

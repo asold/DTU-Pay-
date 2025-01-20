@@ -16,6 +16,7 @@ import org.junit.Assert;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 
@@ -42,6 +43,7 @@ public class PaymentSteps {
     private Payment payment;
 
     private TokenResult randomTokenFromCustomerList;
+    private Exception exception;
 
     // Account
 
@@ -68,8 +70,8 @@ public class PaymentSteps {
         dtuPayCustomer.setBankAccountNumber(customerBankAccountNumber);
     }
 
-    @And("the customer is registered with Simple DTU Pay using their bank account")
-    public void theCustomerIsRegisteredWithSimpleDTUPayUsingTheirBankAccount() {
+    @And("the customer is registered with DTU Pay using their bank account")
+    public void theCustomerIsRegisteredWithDTUPayUsingTheirBankAccount() {
         // Register the customer with DTU Pay
         dtuPayCustomer.setId(customerAdapter.register(dtuPayCustomer));
     }
@@ -102,8 +104,8 @@ public class PaymentSteps {
         dtuPayMerchant.setBankAccountNumber(merchantBankAccountNumber);
     }
 
-    @And("the merchant is registered with Simple DTU Pay using their bank account")
-    public void theMerchantIsRegisteredWithSimpleDTUPayUsingTheirBankAccount() {
+    @And("the merchant is registered with DTU Pay using their bank account")
+    public void theMerchantIsRegisteredWithDTUPayUsingTheirBankAccount() {
         // Register the merchant with DTU Pay
         String merchantId = merchantAdapter.register(dtuPayMerchant);
         dtuPayMerchant.setId(merchantId);
@@ -111,10 +113,16 @@ public class PaymentSteps {
 
     @When("the merchant initiates a payment for {int} kr using the customer's token")
     public void theMerchantInitiatesAPaymentForKrUsingTheCustomerSToken(int amount) throws Exception {
-        randomTokenFromCustomerList = customerTokens.get(new Random().nextInt(customerTokens.size()));
-        payment = new Payment(dtuPayMerchant.getId(), randomTokenFromCustomerList.tokenId(), new BigDecimal(amount));
+            try{
+                randomTokenFromCustomerList = customerTokens.get(new Random().nextInt(customerTokens.size()));
+                payment = new Payment(dtuPayMerchant.getId(), randomTokenFromCustomerList.tokenId(), new BigDecimal(amount));
 
-        paymentResponse = paymentAdapter.requestPayment(payment);
+                paymentResponse = paymentAdapter.requestPayment(payment);
+            }catch (Exception e){
+                paymentResponse = null;
+                exception = e;
+            }
+
     }
 
     @Then("the payment is successful")
@@ -140,6 +148,45 @@ public class PaymentSteps {
         assertThrows("Invalid Token", Exception.class, () -> paymentAdapter.requestPayment(payment));
     }
 
+    @Then("the payment is not successful")
+    public void thePaymentIsNotSuccessful() {
+        assertFalse(paymentResponse.successful());
+    }
+
+    @And("the customer has tokens, but they are invalid")
+    public void theCustomerHasTokensButTheyAreInvalid() {
+        customerTokens = List.of(
+                new TokenResult(UUID.randomUUID()), // random token 1
+                new TokenResult(UUID.randomUUID())  // random token 2
+        );
+
+        dtuPayCustomer.setTokens(customerTokens);
+    }
+
+    @And("the customer is not registered with the bank")
+    public void theCustomerIsNotRegisteredWithTheBank() {
+        customerBankAccountNumber = "unregistered-account";
+        dtuPayCustomer.setBankAccountNumber(customerBankAccountNumber);
+    }
+
+    @And("an error message {string} is returned")
+    public void anErrorMessageIsReturned(String expectedError) {
+        assertNull(paymentResponse);
+        assertThrows(expectedError, Exception.class, () -> paymentAdapter.requestPayment(payment));
+
+    }
+
+    @And("the merchant is not registered with the bank")
+    public void theMerchantIsNotRegisteredWithTheBank() {
+        merchantBankAccountNumber = "unregistered-account";
+        dtuPayMerchant.setBankAccountNumber(merchantBankAccountNumber);
+    }
+
+
+    @And("the merchant is not registered with DTU Pay using their bank account")
+    public void theMerchantIsNotRegisteredWithDTUPayUsingTheirBankAccount() {
+        dtuPayMerchant.setId("unregistered-dtuPay-id");
+    }
 
     @Before
     public void beforeTests() {
@@ -159,73 +206,22 @@ public class PaymentSteps {
             }
         }
         catch (BankServiceException_Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
     @After
     public void cleanUp() {
         try {
-            if (customerBankAccountNumber != null) {
+            if (customerBankAccountNumber != null && !customerBankAccountNumber.equals("unregistered-account")) {
                 bankService.retireAccount(customerBankAccountNumber);
             }
 
-            if (merchantBankAccountNumber != null) {
+            if (merchantBankAccountNumber != null && !merchantBankAccountNumber.equals("unregistered-account")) {
                 bankService.retireAccount(merchantBankAccountNumber);
             }
         } catch (BankServiceException_Exception e) {
             throw new RuntimeException(e);
         }
 
-    }
-
-    @Then("the payment is not successful")
-    public void thePaymentIsNotSuccessful() {
-        
-    }
-
-    @And("the customer has no valid tokens from DTU Pay")
-    public void theCustomerHasNoValidTokensFromDTUPay() {
-        
-    }
-
-    @And("the customer is not registered with the bank")
-    public void theCustomerIsNotRegisteredWithTheBank() {
-        
-    }
-
-    @And("an error message {string} is returned")
-    public void anErrorMessageIsReturned(String arg0) {
-        
-    }
-
-    @And("the merchant is not registered with the bank")
-    public void theMerchantIsNotRegisteredWithTheBank() {
-        
-    }
-
-    @And("the error message {string} is returned")
-    public void theErrorMessageIsReturned(String arg0) {
-        
-    }
-
-    @And("the merchant is not registered with Simple DTU Pay using their bank account")
-    public void theMerchantIsNotRegisteredWithSimpleDTUPayUsingTheirBankAccount() {
-    }
-
-    // Account tests
-
-    @When("the customer registers with DTUPay")
-    public void theCustomerRegistersWithDTUPay() {
-        dtuPayCustomerAccountRegisterResult = customerAdapter.register(dtuPayCustomer);
-    }
-
-    @Then("the registration is successful")
-    public void theRegistrationIsSuccessful() {
-        assertNotEquals(null, dtuPayCustomerAccountRegisterResult);
-    }
-
-    @And("the customer id is returned from DTUPay")
-    public void theCustomerIdIsReturnedFromDTUPay() {
-        //assertEquals(dtuPayCustomer.getId(), );
     }
 }

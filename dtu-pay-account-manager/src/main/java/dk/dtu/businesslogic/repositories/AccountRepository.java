@@ -25,11 +25,13 @@ public class AccountRepository {
         merchants.add(merchant);
     }
 
-    public void deleteCustomer(Customer customer) {
-        customers.remove(customer); }
+    public void deleteCustomer(String customerId) {
+        customers.removeIf(customer -> customer.getId().equals(customerId));
+    }
 
-    public void deleteMerchant(Merchant merchant) {
-        merchants.remove(merchant);}
+    public void deleteMerchant(String merchantId) {
+        merchants.removeIf(merchant -> merchant.getId().equals(merchantId));
+    }
 
     public Optional<Customer> getCustomerById(String id) {
         return customers.stream().filter(c -> c.getId().equals(id)).findFirst();

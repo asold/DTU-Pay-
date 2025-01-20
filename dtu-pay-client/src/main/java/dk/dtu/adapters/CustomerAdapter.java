@@ -32,6 +32,13 @@ public final class CustomerAdapter {
         return response.readEntity(String.class);
     }
 
+    public String deregister(String  id) {
+        Response response = client.target("http://localhost:8082/customers/" + id)
+                .request(MediaType.APPLICATION_JSON)
+                .delete();
+        return response.readEntity(String.class);
+    }
+
     public List<TokenResult> getTokens(String id, int amount) {
         Response response = client.target("http://localhost:8082/tokens/" + id)
                 .queryParam("amount", amount)
@@ -42,4 +49,5 @@ public final class CustomerAdapter {
 
         return receivedTokens;
     }
+
 }
