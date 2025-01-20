@@ -17,7 +17,7 @@ public class ReportAdapter {
      */
 
     public List<PaymentLog> getCustomerReport(String id) {
-        Response response = client.target("http://localhost:8082/Reports/" + id)
+        Response response = client.target("http://localhost:8082/reports/" + id)
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
