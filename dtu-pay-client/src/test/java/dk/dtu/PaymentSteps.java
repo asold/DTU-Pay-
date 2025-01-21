@@ -1,9 +1,9 @@
 package dk.dtu;
 
-import dk.dtu.core.models.*;
 import dk.dtu.adapters.CustomerAdapter;
 import dk.dtu.adapters.MerchantAdapter;
 import dk.dtu.adapters.PaymentAdapter;
+import dk.dtu.core.models.*;
 import dtu.ws.fastmoney.*;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -77,7 +77,7 @@ public class PaymentSteps {
     }
 
     @And("the customer has {int} valid token from DTU Pay")
-    public void theCustomerHasAValidTokenFromDTUPay(int amount) {
+    public void theCustomerHasAValidTokenFromDTUPay(int amount) throws Exception {
         customerTokens = customerAdapter.getTokens(dtuPayCustomer.getId(), amount ); // the customer class has a field for this ->
         dtuPayCustomer.setTokens(customerTokens);
 
@@ -190,7 +190,7 @@ public class PaymentSteps {
 
     @Before
     public void beforeTests() {
-        System.out.println("Clean up");
+        System.out.println("Clean up PyamentSteps before");
         try {
             Account customerAccount = bankService.getAccountByCprNumber("250103-7220");
             if (customerAccount != null) {
@@ -211,6 +211,7 @@ public class PaymentSteps {
     }
     @After
     public void cleanUp() {
+        System.out.println("Clean up PyamentSteps after");
         try {
             if (customerBankAccountNumber != null && !customerBankAccountNumber.equals("unregistered-account")) {
                 bankService.retireAccount(customerBankAccountNumber);

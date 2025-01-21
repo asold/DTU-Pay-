@@ -1,6 +1,8 @@
 package dk.dtu.core.models;
 
+import dtu.ws.fastmoney.User;
 import org.jmolecules.ddd.annotation.Entity;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -18,7 +20,7 @@ public final class Customer {
     private String lastName;
     private String bankAccountNumber;
     private String cpr;
-    private List<TokenResult> tokens;
+    private List<TokenResult> tokens = new ArrayList<>();
 
     public Customer(String id, String firstName, String lastName, String bankAccountNumber, String cpr) {
         this.id = id;
@@ -26,7 +28,12 @@ public final class Customer {
         this.lastName = lastName;
         this.bankAccountNumber = bankAccountNumber;
         this.cpr = cpr;
-        this.tokens = new ArrayList<TokenResult>();
+    }
+
+    public Customer(User bankUser) {
+        this.firstName = bankUser.getFirstName();
+        this.lastName = bankUser.getLastName();
+        this.cpr = bankUser.getCprNumber();
     }
 
     public Customer() {}

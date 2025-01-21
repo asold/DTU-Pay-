@@ -2,9 +2,14 @@ package dk.dtu.businesslogic.models;
 
 import com.google.gson.annotations.Expose;
 import org.jmolecules.ddd.annotation.Entity;
+
 import java.util.UUID;
 
-
+/**
+ * Internal model of a token in the Token Manager Microservice
+ *
+ * @author Simão Teixeira (s232431)
+ */
 @Entity
 public final class Token {
     private final UUID tokenId;

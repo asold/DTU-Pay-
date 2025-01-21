@@ -4,6 +4,7 @@ COPY messaging-utilities /app/messaging-utilities
 RUN mvn clean install -f /app/messaging-utilities/pom.xml
 COPY dtu-pay-token-manager/pom.xml .
 COPY dtu-pay-token-manager/src ./src
+COPY dtu-pay-token-manager/features ./features
 RUN mvn clean package
 
 FROM eclipse-temurin:21
