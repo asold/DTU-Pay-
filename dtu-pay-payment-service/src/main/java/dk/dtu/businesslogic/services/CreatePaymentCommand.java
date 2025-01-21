@@ -1,6 +1,7 @@
 package dk.dtu.businesslogic.services;
 
 import java.math.BigDecimal;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author  Zavidei Maxim  s240394
@@ -10,6 +11,7 @@ public final class CreatePaymentCommand {
     private String merchantBankAccountId;
     private String customerBankAccountId;
     private BigDecimal amount;
+    private final AtomicBoolean executed = new AtomicBoolean(false);
 
     public CreatePaymentCommand(){
         merchantBankAccountId = null;
@@ -39,6 +41,13 @@ public final class CreatePaymentCommand {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public boolean allowsExecution() {
+        if (merchantBankAccountId != null && customerBankAccountId != null && amount != null && !executed.get()) {
+            return executed.compareAndSet(false, true);
+        }
+        return false;
     }
 
     @Override
