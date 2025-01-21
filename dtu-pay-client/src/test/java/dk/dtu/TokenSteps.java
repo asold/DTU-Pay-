@@ -27,7 +27,7 @@ public class TokenSteps {
     private String errorMessageReturned;
 
     @Given("a customer of DTU pay")
-    public void aCustomerOfDTUPay() throws BankServiceException_Exception {
+    public void aCustomerOfDTUPay() throws Exception {
         // Create Bank Account
         var bankCustomer = new User();
         bankCustomer.setFirstName("FirstName");
