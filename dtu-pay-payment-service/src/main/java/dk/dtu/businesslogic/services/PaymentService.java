@@ -8,13 +8,12 @@ import messaging.MessageQueue;
 import messaging.implementations.RabbitMqQueue;
 import java.math.BigDecimal;
 import java.util.concurrent.ConcurrentHashMap;
-
 import dtu.ws.fastmoney.BankService;
 import dtu.ws.fastmoney.BankServiceService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-
+/**
+ * @author  Andrei Soldan 243873
+ */
 public final class PaymentService {
 
     private final MessageQueue queue;

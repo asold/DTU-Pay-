@@ -18,7 +18,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-
+/**
+ * @author  Andrei Soldan 243873
+ */
 @Singleton
 public class PaymentFacade {
 

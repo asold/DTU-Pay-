@@ -17,7 +17,9 @@ import messaging.MessageQueue;
 import messaging.Event;
 import java.math.BigDecimal;
 import static org.mockito.Mockito.*;
-
+/**
+ * @author  Andrei Soldan 243873
+ */
 public class PaymentStepDefinitions {
 
     private MessageQueue queue = mock(MessageQueue.class);
