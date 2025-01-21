@@ -1,6 +1,7 @@
 package dk.dtu;
 
 import dk.dtu.adapters.TokenFacade;
+import dk.dtu.core.exceptions.TokenServiceException;
 import dk.dtu.core.models.TokenResult;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -16,11 +17,12 @@ import java.util.concurrent.ExecutionException;
 public class TokenResource {
 
     @Inject
-    private TokenFacade tokenFacade;
+    TokenFacade tokenFacade;
 
     @GET
     @Path("{id}")
-    public Response getTokens(@PathParam("id") String id, @QueryParam("amount") int amount) throws ExecutionException, InterruptedException {
+    public Response getTokens(@PathParam("id") String id, @QueryParam("amount") int amount) throws TokenServiceException, ExecutionException, InterruptedException {
+
         List<TokenResult> customerTokens = tokenFacade.getTokens(id, amount);
         return Response.ok(customerTokens).build();
     }

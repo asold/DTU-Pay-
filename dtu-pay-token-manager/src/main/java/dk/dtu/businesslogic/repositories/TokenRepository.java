@@ -1,13 +1,19 @@
 package dk.dtu.businesslogic.repositories;
 
-import dk.dtu.businesslogic.exceptions.DuplicateTokenUUIDException;
-import dk.dtu.businesslogic.exceptions.TokenNotFoundException;
 import dk.dtu.businesslogic.models.Token;
+import dk.dtu.businesslogic.repositories.exceptions.DuplicateTokenUUIDException;
+import dk.dtu.businesslogic.repositories.exceptions.TokenNotFoundException;
 
 import java.util.ArrayList;
-import java.util.UUID;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
+/**
+ * Repository Responsible for CRUD operations of Tokens resource
+ *
+ * @author Simão Teixeira (s232431)
+ */
 @SuppressWarnings("UnusedReturnValue")
 public class TokenRepository {
 
@@ -27,11 +33,8 @@ public class TokenRepository {
         }
     }
 
-    public Token getTokenByValue(UUID tokenValue) throws TokenNotFoundException {
-        return tokens.stream()
-                .filter(t -> tokenValue.equals(t.getTokenId()))
-                .findAny()
-                .orElseThrow(() -> new TokenNotFoundException(tokenValue.toString()));
+    public Optional<Token> getTokenByValue(UUID tokenValue) {
+        return tokens.stream().filter(t -> tokenValue.equals(t.getTokenId())).findAny();
     }
 
     public List<Token> getTokensByCustomerId(String customerId) {

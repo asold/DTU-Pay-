@@ -23,6 +23,7 @@ public class AccountService {
 		this.queue = q;
 		queue.addHandler("CustomerAccountRegistrationRequested", this::policyCustomerRegistrationRequested);
 		queue.addHandler("MerchantAccountRegistrationRequested", this::policyMerchantRegistrationRequested);
+		queue.addHandler("TokensRequested", this::policyTokensRequested);
 
 		queue.addHandler("CustomerAccountDeregistrationRequested", this::policyCustomerDeregistrationRequested);
 		queue.addHandler("MerchantAccountDeregistrationRequested", this::policyMerchantDeregistrationRequested);
@@ -67,6 +68,22 @@ public class AccountService {
 		queue.publish(new Event("MerchantRegistered", correlationId, mid));
 	}
 
+	/**
+	 * Handles the TokensRequested event Publishes an event handled by the token manager informing if
+	 * the account requesting the tokens exists or not
+	 *
+	 * @param event Event
+	 * @author Simão Teixeira (s232431)
+	 */
+	public void policyTokensRequested(Event event) {
+		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+		String customerId = event.getArgument(1, String.class);
+		queue.publish(
+				new Event(
+						"CustomerAccountValidated",
+						correlationId,
+						accountRepository.getCustomerById(customerId).isPresent()));
+	}
 	/**
 	 * Handles the 'CustomerAccountDeregistrationRequested' event
 	 * @param event the event

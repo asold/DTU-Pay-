@@ -43,15 +43,18 @@ public final class CustomerAdapter {
         return response.readEntity(String.class);
     }
 
-    public List<TokenResult> getTokens(String id, int amount) {
+    public List<TokenResult> getTokens(String id, int amount) throws Exception {
         Response response = client.target("http://localhost:8082/tokens/" + id)
                 .queryParam("amount", amount)
                 .request(MediaType.APPLICATION_JSON)
                 .get();
 
-        List<TokenResult> receivedTokens = response.readEntity(new GenericType<List<TokenResult>>() {});
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            throw new Exception(response.readEntity(String.class));
+        }
 
-        return receivedTokens;
+        return response.readEntity(new GenericType<List<TokenResult>>() {
+        });
     }
 
 }

@@ -1,6 +1,7 @@
 package dk.dtu.adapters;
 
 import com.google.gson.reflect.TypeToken;
+import dk.dtu.core.exceptions.TokenServiceException;
 import dk.dtu.core.models.TokenResult;
 import jakarta.inject.Singleton;
 import messaging.CorrelationId;
@@ -14,10 +15,16 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+
+/**
+ * Token facade responsible to publish and handle events related with the tokens resource
+ *
+ * @author Simão Teixeira (s232431)
+ */
 @Singleton
 public class TokenFacade {
 
-    private Map<CorrelationId, CompletableFuture<List<TokenResult>>> tokenRequests = new ConcurrentHashMap<>();
+    private final Map<CorrelationId, CompletableFuture<List<TokenResult>>> tokenRequests = new ConcurrentHashMap<>();
 
     private final MessageQueue queue;
 
@@ -28,6 +35,7 @@ public class TokenFacade {
     public TokenFacade(RabbitMqQueue q) {
         queue = q;
         q.addHandler("TokensGenerated", this::policyTokensGenerated);
+        q.addHandler("TokensGeneratedFailed", this::policyTokensGeneratedFailed);
     }
 
     private void policyTokensGenerated(Event e){
@@ -40,12 +48,27 @@ public class TokenFacade {
         tokenRequests.remove(correlationId);
     }
 
-    public List<TokenResult> getTokens(String id, int amount) throws ExecutionException, InterruptedException {
+    private void policyTokensGeneratedFailed(Event e) {
+        CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
+        CompletableFuture<List<TokenResult>> future = tokenRequests.get(correlationId);
+        String errorCode = e.getArgument(1, String.class);
+        String errorMessage = e.getArgument(2, String.class);
+        future.completeExceptionally(new TokenServiceException(errorCode, errorMessage));
+    }
+
+    public List<TokenResult> getTokens(String id, int amount) throws ExecutionException, InterruptedException, TokenServiceException {
         CorrelationId correlationId = new CorrelationId();
         CompletableFuture<List<TokenResult>> tokens = new CompletableFuture<>();
         tokenRequests.put(correlationId, tokens);
-        queue.publish(new Event("TokensRequested",correlationId, id, amount));
-        return tokens.get();
+        queue.publish(new Event("TokensRequested", correlationId, id, amount));
+        try {
+            return tokens.get();
+        } catch (InterruptedException | ExecutionException e) {
+            if (e.getCause() instanceof TokenServiceException) {
+                throw (TokenServiceException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
     }
-
 }
