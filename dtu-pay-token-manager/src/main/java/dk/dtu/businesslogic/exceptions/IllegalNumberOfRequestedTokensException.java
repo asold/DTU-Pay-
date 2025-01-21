@@ -1,4 +1,4 @@
-package dk.dtu.businesslogic.services.exceptions;
+package dk.dtu.businesslogic.exceptions;
 
 /**
  * Exception thrown when an Illegal Number of Tokens is requested by a user

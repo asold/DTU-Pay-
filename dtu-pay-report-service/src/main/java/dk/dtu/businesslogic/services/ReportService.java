@@ -73,10 +73,14 @@ public class ReportService {
 	private void storePaymentLogIfCompleted(CorrelationId correlationId) {
 		// Verify if all events were received
 		var pendingPaymentLog = pendingPaymentLogs.get(correlationId);
-		if (pendingPaymentLog.getMerchantId() != null && pendingPaymentLog.getAmount() != null && pendingPaymentLog.getCustomerId() != null && pendingPaymentLog.getTokenId()!=null && pendingPaymentLog.isPaymentSuccessful() == true) {
+		if(pendingPaymentLog.allowsExecution()){
 			reportRepository.addPaymentLog(pendingPaymentLog);
 			pendingPaymentLogs.remove(correlationId);
 		}
+//		if (pendingPaymentLog.getMerchantId() != null && pendingPaymentLog.getAmount() != null && pendingPaymentLog.getCustomerId() != null && pendingPaymentLog.getTokenId()!=null && pendingPaymentLog.isPaymentSuccessful() == true) {
+//			reportRepository.addPaymentLog(pendingPaymentLog);
+//			pendingPaymentLogs.remove(correlationId);
+//		}
 	}
 
 	private void retrieveCustomerReport(Event event) {

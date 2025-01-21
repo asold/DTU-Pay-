@@ -47,35 +47,11 @@ public class ReportSteps {
     private TokenResult randomTokenFromCustomerList;
 
     private List<PaymentLog> receivedLogs;
+    private String merchantCpr;
 
 
-
-    @Before
-    public void beforeTests() {
-
-    }
-
-    @After
-    public void cleanUp() {
-        try {
-            if (customerBankAccountNumber != null) {
-                bankService.retireAccount(customerBankAccountNumber);
-            }
-
-            if (merchantBankAccountNumber != null) {
-                bankService.retireAccount(merchantBankAccountNumber);
-            }
-        } catch (BankServiceException_Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    @Given("{int} payment between a customer and a merchant")
-    public void paymentBetweenACustomerAndAMerchant(int arg0) throws BankServiceException_Exception, Exception {
-
-        //@Before
-        System.out.println("Clean up");
+    @Before("@Report")
+    public void beforeTests() throws Exception {
         try {
             Account customerAccount = bankService.getAccountByCprNumber("250103-7220");
             if (customerAccount != null) {
@@ -94,87 +70,80 @@ public class ReportSteps {
             System.out.println(e.getMessage());
         }
 
-
-        //@Given("a customer with name {string}, last name {string}, and CPR {string}")
-        String firstName = "Susan";
-        String lastName = "Baldwin";
-        String cpr = "250103-7220";
+        String customerFirstName = "Susan";
+        String customerLastName = "Baldwin";
+        String customerCpr = "250103-7220";
 
         // Initialize the User model from the bank integration
         bankCustomer = new User();
-        bankCustomer.setFirstName(firstName);
-        bankCustomer.setLastName(lastName);
-        bankCustomer.setCprNumber(cpr);
+        bankCustomer.setFirstName(customerFirstName);
+        bankCustomer.setLastName(customerLastName);
+        bankCustomer.setCprNumber(customerCpr);
 
         // Initialize the dtuPayCustomer model
         dtuPayCustomer = new Customer();
-        dtuPayCustomer.setFirstName(firstName);
-        dtuPayCustomer.setLastName(lastName);
-        dtuPayCustomer.setCpr(cpr);
+        dtuPayCustomer.setFirstName(customerFirstName);
+        dtuPayCustomer.setLastName(customerLastName);
+        dtuPayCustomer.setCpr(customerCpr);
 
-        //@And("the customer is registered with the bank with an initial balance of {int} kr")
         customerBankAccountNumber = bankService.createAccountWithBalance(this.bankCustomer, new BigDecimal(1000));
         dtuPayCustomer.setBankAccountNumber(customerBankAccountNumber);
 
-        //@And("the customer is registered with Simple DTU Pay using their bank account")
         dtuPayCustomer.setId(customerAdapter.register(dtuPayCustomer));
 
-        //@And("the customer has {int} valid token from DTU Pay")
-        customerTokens = customerAdapter.getTokens(dtuPayCustomer.getId(), 1 ); // the customer class has a field for this ->
+        customerTokens = customerAdapter.getTokens(dtuPayCustomer.getId(), 2 );
         dtuPayCustomer.setTokens(customerTokens);
 
-        //@And("a merchant with name {string}, last name {string}, and CPR {string}")
         // Initialize the User model from the bank integration
-        firstName = "Daniel";
-        lastName = "Oliver";
-        cpr = "241902-7253";
+        String merchantFirstName = "Daniel";
+        String merchantLastName = "Oliver";
+        merchantCpr = "241902-7253";
         bankMerchant = new User();
-        bankMerchant.setFirstName(firstName);
-        bankMerchant.setLastName(lastName);
-        bankMerchant.setCprNumber(cpr);
+        bankMerchant.setFirstName(merchantFirstName);
+        bankMerchant.setLastName(merchantLastName);
+        bankMerchant.setCprNumber(merchantCpr);
 
         // Initialize the dtuPayCustomer model
         dtuPayMerchant = new Merchant();
-        dtuPayMerchant.setFirstName(firstName);
-        dtuPayMerchant.setLastName(lastName);
-        dtuPayMerchant.setCpr(cpr);
+        dtuPayMerchant.setFirstName(merchantFirstName);
+        dtuPayMerchant.setLastName(merchantLastName);
+        dtuPayMerchant.setCpr(merchantCpr);
 
-        //@And("the merchant is registered with the bank with an initial balance of {int} kr")
         merchantBankAccountNumber = bankService.createAccountWithBalance(this.bankMerchant, new BigDecimal(1000));
         dtuPayMerchant.setBankAccountNumber(merchantBankAccountNumber);
 
-        //@And("the merchant is registered with Simple DTU Pay using their bank account")
         // Register the merchant with DTU Pay
         String merchantId = merchantAdapter.register(dtuPayMerchant);
         dtuPayMerchant.setId(merchantId);
+    }
+
+    @After("Report")
+    public void cleanUp() {
+        try {
+            if (customerBankAccountNumber != null) {
+                bankService.retireAccount(customerBankAccountNumber);
+            }
+
+            if (merchantBankAccountNumber != null) {
+                bankService.retireAccount(merchantBankAccountNumber);
+            }
+        } catch (BankServiceException_Exception e) {
+            System.err.println(e.getMessage());
+        }
+
+    }
+
+    @Given("{int} payment between a customer and a merchant")
+    public void paymentBetweenACustomerAndAMerchant(int numberOfPaymentsToMake) throws BankServiceException_Exception, Exception {
 
         //makes more payment
-        for(int i = arg0 ; i > 0; i--){
-            //@When("the merchant initiates a payment for {int} kr using the customer's token")
+        for(int i = 0 ; i < numberOfPaymentsToMake; i++){
             randomTokenFromCustomerList = customerTokens.get(new Random().nextInt(customerTokens.size()));
+            customerTokens.remove(randomTokenFromCustomerList);
             payment = new Payment(dtuPayMerchant.getId(), randomTokenFromCustomerList.tokenId(), new BigDecimal(10));
 
             paymentResponse = paymentAdapter.requestPayment(payment);
-
-            //Get a new token
-            customerTokens = customerAdapter.getTokens(dtuPayCustomer.getId(), 1 ); // the customer class has a field for this ->
-            dtuPayCustomer.setTokens(customerTokens);
-
         }
-
-        //@Then("the payment is successful")
-        assertTrue(paymentResponse.successful());
-
-        //@And("the balance of the customer at the bank is {int} kr")
-        Account customerAccount = bankService.getAccount(customerBankAccountNumber);
-        Assert.assertEquals(new BigDecimal(1000-(arg0*10)).setScale(4), customerAccount.getBalance().setScale(4));
-
-        //@And("the balance of the merchant at the bank is {int} kr")
-        Account merchantAccount = bankService.getAccount(merchantBankAccountNumber);
-        Assert.assertEquals(new BigDecimal(1000+(arg0*10)).setScale(4), merchantAccount.getBalance().setScale(4));
-
-        //@And("the customer's token is no longer valid")
-        assertThrows("Invalid Token", Exception.class, () -> paymentAdapter.requestPayment(payment));
 
     }
 

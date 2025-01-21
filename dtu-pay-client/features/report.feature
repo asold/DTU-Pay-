@@ -1,3 +1,4 @@
+@Report
 Feature: Reporting
 
   Scenario: Successful customer report generation
