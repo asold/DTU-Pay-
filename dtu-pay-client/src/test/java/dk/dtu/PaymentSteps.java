@@ -44,6 +44,7 @@ public class PaymentSteps {
 
     private TokenResult randomTokenFromCustomerList;
     private Exception exception;
+    String test;
 
     @Given("a customer with name {string}, last name {string}, and CPR {string}")
     public void aCustomerWithNameLastNameAndCPR(String firstName, String lastName, String cpr) {
@@ -123,6 +124,8 @@ public class PaymentSteps {
 
     @Then("the payment is successful")
     public void thePaymentIsSuccessful() {
+        test = "test";
+
         assertTrue(paymentResponse.successful());
     }
 
@@ -145,6 +148,7 @@ public class PaymentSteps {
 
     @Then("the payment is not successful")
     public void thePaymentIsNotSuccessful() {
+        System.out.println(test);
         assertFalse(paymentResponse.successful());
     }
 
@@ -217,6 +221,8 @@ public class PaymentSteps {
         } catch (BankServiceException_Exception e) {
             throw new RuntimeException(e);
         }
+
+        randomTokenFromCustomerList= null;
 
     }
 }

@@ -13,11 +13,6 @@ services:
       interval: 10s
       timeout: 30s
       retries: 5
-#    healthcheck:
-#      test: check_running
-#      interval: 10s
-#      timeout: 30s
-#      retries: 3
 
   account-manager:
     build:

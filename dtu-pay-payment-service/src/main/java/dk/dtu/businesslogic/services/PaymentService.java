@@ -64,6 +64,7 @@ public final class PaymentService {
         var paymentCommand = pendingPaymentCommandsMap.get(correlationId);
         if (paymentCommand.getCustomerBankAccountId() != null && paymentCommand.getMerchantBankAccountId() != null && paymentCommand.getAmount() != null)
         {
+
             // Here it means we have received all the data for a payment
             // Execute Payment
             try
