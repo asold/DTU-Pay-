@@ -75,7 +75,7 @@ public class AccountService {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		var customerId = event.getArgument(1, String.class);
 		deregisterCustomer(customerId);
-		queue.publish(new Event("CustomerDeregistered", correlationId));
+		queue.publish(new Event("CustomerDeregistered", correlationId, customerId));
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class AccountService {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		var merchantId = event.getArgument(1, String.class);
 		deregisterMerchant(merchantId);
-		queue.publish(new Event("MerchantDeregistered", correlationId));
+		queue.publish(new Event("MerchantDeregistered", correlationId, merchantId));
 	}
 
 
@@ -159,9 +159,10 @@ public class AccountService {
 	 * @throws RuntimeException if there is no customer with the given ID
 	 */
 	public void retrieveCustomerBankAccount(String customerId, CorrelationId correlationId) {
-		var customerAccount = accountRepository.getCustomerById(customerId)
-				.orElseThrow(() -> new RuntimeException("Customer not found"));
-		queue.publish(new Event("CustomerBankAccountRetrieved", correlationId, customerAccount.getBankAccountNumber()));
+		accountRepository.getCustomerById(customerId).ifPresentOrElse(
+				customer -> queue.publish(new Event("CustomerBankAccountRetrieved", correlationId, customer.getBankAccountNumber())),
+				() -> queue.publish(new Event("CustomerAccountNotFound", correlationId , "Customer not found"))
+		);
 	}
 
 	/**
@@ -171,9 +172,11 @@ public class AccountService {
 	 * @throws RuntimeException if there is no merchant with the given ID
 	 */
 	public void retrieveMerchantBankAccount(String merchantId, CorrelationId correlationId) {
-		var merchantAccount = accountRepository.getMerchantById(merchantId)
-				.orElseThrow(() -> new RuntimeException("Merchant not found"));
-		queue.publish(new Event("MerchantBankAccountRetrieved", correlationId, merchantAccount.getBankAccountNumber()));
+
+		accountRepository.getMerchantById(merchantId).ifPresentOrElse(merchant ->
+				queue.publish(new Event("MerchantBankAccountRetrieved",correlationId, merchant.getBankAccountNumber())),
+				() -> queue.publish(new Event("MerchantAccountNotFound", correlationId , "Merchant not found"))
+		);
 	}
 
 
@@ -191,7 +194,7 @@ public class AccountService {
 					Pair.of("first name", firstName),
 					Pair.of("last name", lastName),
 					Pair.of("CPR", cpr),
-					Pair.of("Bank account number", bankAccountNumber)
+					Pair.of("bank account number", bankAccountNumber)
 				)
 		);
 		if (!invalidFields.isEmpty()) {

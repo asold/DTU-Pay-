@@ -71,7 +71,7 @@ public class PaymentSteps {
     }
 
     @And("the customer is registered with DTU Pay using their bank account")
-    public void theCustomerIsRegisteredWithDTUPayUsingTheirBankAccount() {
+    public void theCustomerIsRegisteredWithDTUPayUsingTheirBankAccount() throws Exception {
         // Register the customer with DTU Pay
         dtuPayCustomer.setId(customerAdapter.register(dtuPayCustomer));
     }
@@ -105,7 +105,7 @@ public class PaymentSteps {
     }
 
     @And("the merchant is registered with DTU Pay using their bank account")
-    public void theMerchantIsRegisteredWithDTUPayUsingTheirBankAccount() {
+    public void theMerchantIsRegisteredWithDTUPayUsingTheirBankAccount() throws Exception {
         // Register the merchant with DTU Pay
         String merchantId = merchantAdapter.register(dtuPayMerchant);
         dtuPayMerchant.setId(merchantId);

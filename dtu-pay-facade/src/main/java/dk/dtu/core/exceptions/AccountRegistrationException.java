@@ -1,6 +1,6 @@
 package dk.dtu.core.exceptions;
 
-public class AccountRegistrationException extends Exception {
+public class AccountRegistrationException extends RuntimeException {
 
     public AccountRegistrationException(String message) { super(message); }
 
@@ -12,5 +12,10 @@ public class AccountRegistrationException extends Exception {
     @SuppressWarnings("unused")
     public AccountRegistrationException(Throwable cause) {
         super(cause);
+    }
+
+    @Override
+    public String toString() {
+        return this.getMessage();
     }
 }

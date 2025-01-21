@@ -15,7 +15,6 @@ public class StartUp {
 	public static void main(String[] args) throws Exception {
 
 		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-			System.err.println("Unhandled exception in thread: " + thread.getName());
 			logger.info("Unhandled exception in thread: " + thread.getName() + " " + throwable.getCause());
 		});
 

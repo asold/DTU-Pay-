@@ -22,7 +22,7 @@ public final class PaymentAdapter {
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.json(payment));
 
-        if(response.getStatus() != Response.Status.OK.getStatusCode()) {
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
             throw new Exception(response.readEntity(String.class));
         }
 

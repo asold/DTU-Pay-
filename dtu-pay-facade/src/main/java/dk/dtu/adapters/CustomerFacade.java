@@ -46,6 +46,7 @@ public class CustomerFacade {
     private void policyCustomerRegistrationFailed(Event e) {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         String error = e.getArgument(1, String.class);
+        System.out.println("Policy customer registration failed: " + error);
         CompletableFuture<String> future = customerRequests.get(correlationId);
         future.completeExceptionally(new AccountRegistrationException(error));
         customerRequests.remove(correlationId);

@@ -24,10 +24,14 @@ public final class CustomerAdapter {
      * @return DtuPlay customer ID
      * @author Andrei Soldan s243873
      */
-    public String register(Customer dtuPayCustomer) {
+    public String register(Customer dtuPayCustomer) throws Exception {
         Response response = client.target("http://localhost:8082/customers")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.json(dtuPayCustomer));
+
+        if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
+            throw new Exception(response.readEntity(String.class));
+        }
 
         return response.readEntity(String.class);
     }

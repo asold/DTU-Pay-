@@ -55,7 +55,7 @@ public class MerchantFacade {
     public String registerMerchant(Merchant merchant) throws InterruptedException, ExecutionException, AccountRegistrationException {
         CorrelationId correlationId = new CorrelationId();
         merchantRequests.put(correlationId, new CompletableFuture<>());
-        queue.publish(new Event("MerchantAccountRegistrationRequested",correlationId, merchant));
+        queue.publish(new Event("MerchantAccountRegistrationRequested", correlationId, merchant));
         return merchantRequests.get(correlationId).get();
     }
 
