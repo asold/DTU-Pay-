@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 public class PaymentFacade {
 
     private final MessageQueue queue;
-    private Map<CorrelationId, CompletableFuture<PaymentResponse>> paymentRequests = new ConcurrentHashMap<>();
+    private final Map<CorrelationId, CompletableFuture<PaymentResponse>> paymentRequests = new ConcurrentHashMap<>();
 
     public PaymentFacade() {
         this(new RabbitMqQueue("rabbitMq"));
@@ -50,43 +50,51 @@ public class PaymentFacade {
     public void policyTokenValidationFailed(Event event) {
         CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
         String message = event.getArgument(1, String.class);
-
-        CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
-        future.completeExceptionally(new InvalidTokenException(message));
-        paymentRequests.remove(correlationId);
+        CompletableFuture<PaymentResponse> future = paymentRequests.getOrDefault(correlationId, null);
+        if (future != null) {
+            future.completeExceptionally(new InvalidTokenException(message));
+            paymentRequests.remove(correlationId);
+        }
     }
 
     public void policyDebtorAccountNotFound(Event event) {
         CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
         String message = event.getArgument(1, String.class);
-
-        CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
-        future.completeExceptionally(new InvalidPaymentException(message));
-        paymentRequests.remove(correlationId);
+        CompletableFuture<PaymentResponse> future = paymentRequests.getOrDefault(correlationId, null);
+        if (future != null) {
+            future.completeExceptionally(new InvalidPaymentException(message));
+            paymentRequests.remove(correlationId);
+        }
     }
 
     public void policyCreditorAccountNotFound(Event event) {
         CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
         String message = event.getArgument(1, String.class);
-        CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
-        future.completeExceptionally(new InvalidPaymentException(message));
-        paymentRequests.remove(correlationId);
+        CompletableFuture<PaymentResponse> future = paymentRequests.getOrDefault(correlationId, null);
+        if (future != null) {
+            future.completeExceptionally(new InvalidPaymentException(message));
+            paymentRequests.remove(correlationId);
+        }
     }
 
     public void policyNegativeAmountRequested(Event event) {
         CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
         String message = event.getArgument(1, String.class);
-        CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
-        future.completeExceptionally(new InvalidPaymentException(message));
-        paymentRequests.remove(correlationId);
+        CompletableFuture<PaymentResponse> future = paymentRequests.getOrDefault(correlationId, null);
+        if (future != null) {
+            future.completeExceptionally(new InvalidPaymentException(message));
+            paymentRequests.remove(correlationId);
+        }
     }
 
     public void policyMerchantNotFound(Event event) {
         CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
         String message = event.getArgument(1, String.class);
-        CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
-        future.completeExceptionally(new AccountNotFoundException(message));
-        paymentRequests.remove(correlationId);
+        CompletableFuture<PaymentResponse> future = paymentRequests.getOrDefault(correlationId, null);
+        if (future != null) {
+            future.completeExceptionally(new AccountNotFoundException(message));
+            paymentRequests.remove(correlationId);
+        }
     }
 
 

@@ -50,10 +50,13 @@ public class TokenFacade {
 
     private void policyTokensGeneratedFailed(Event e) {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
-        CompletableFuture<List<TokenResult>> future = tokenRequests.get(correlationId);
         String errorCode = e.getArgument(1, String.class);
         String errorMessage = e.getArgument(2, String.class);
-        future.completeExceptionally(new TokenServiceException(errorCode, errorMessage));
+        CompletableFuture<List<TokenResult>> future = tokenRequests.getOrDefault(correlationId, null);
+        if (future != null) {
+            future.completeExceptionally(new TokenServiceException(errorCode, errorMessage));
+            tokenRequests.remove(correlationId);
+        }
     }
 
     public List<TokenResult> getTokens(String id, int amount) throws ExecutionException, InterruptedException, TokenServiceException {
