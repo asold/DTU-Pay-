@@ -1,5 +1,7 @@
 package dk.dtu.businesslogic.models;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Policy for Obtaining the Tokens (it must wait for multiple events to be handled)
  *
@@ -9,6 +11,7 @@ public final class TokensRequestPolicy {
     private String customerId;
     private Integer amount;
     private Boolean isValidAccount;
+    private final AtomicBoolean executed = new AtomicBoolean(false);
 
     public TokensRequestPolicy() {
         this.customerId = null;
@@ -46,7 +49,10 @@ public final class TokensRequestPolicy {
         isValidAccount = validAccount;
     }
 
-    public boolean isPolicyCompleted() {
-        return customerId != null && amount != null && isValidAccount != null;
+    public boolean allowsExecution() {
+        if (customerId != null && amount != null && isValidAccount != null && !executed.get()) {
+            return executed.compareAndSet(false, true);
+        }
+        return false;
     }
 }

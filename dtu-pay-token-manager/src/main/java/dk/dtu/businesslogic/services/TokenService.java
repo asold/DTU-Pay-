@@ -156,10 +156,13 @@ public class TokenService {
      */
     private void tryGetTokens(CorrelationId correlationId) {
         var policy = tokensRequests.get(correlationId);
-        if (policy.isPolicyCompleted()) {
+        if (policy.allowsExecution()) {
             try {
-                List<TokenResult> lstTokens =
-                        getTokens(policy.getCustomerId(), policy.getAmount(), policy.getIsValidAccount());
+                List<TokenResult> lstTokens = getTokens(
+                        policy.getCustomerId(),
+                        policy.getAmount(),
+                        policy.getIsValidAccount()
+                );
 
                 queue.publish(new Event("TokensGenerated", correlationId, lstTokens));
 
