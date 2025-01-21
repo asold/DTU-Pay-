@@ -8,7 +8,6 @@ for service in messaging-utilities dtu-pay-account-manager dtu-pay-facade dtu-pa
     echo "Building $service..."
     cd $service
     mvn clean test
-#    mvn package
     cd ..
 done
 

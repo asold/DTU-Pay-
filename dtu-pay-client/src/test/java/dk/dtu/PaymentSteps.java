@@ -45,6 +45,10 @@ public class PaymentSteps {
     private TokenResult randomTokenFromCustomerList;
     private Exception exception;
 
+    // Account
+
+    private String dtuPayCustomerAccountRegisterResult;
+
     @Given("a customer with name {string}, last name {string}, and CPR {string}")
     public void aCustomerWithNameLastNameAndCPR(String firstName, String lastName, String cpr) {
         // Initialize the User model from the bank integration
@@ -67,7 +71,7 @@ public class PaymentSteps {
     }
 
     @And("the customer is registered with DTU Pay using their bank account")
-    public void theCustomerIsRegisteredWithDTUPayUsingTheirBankAccount() {
+    public void theCustomerIsRegisteredWithDTUPayUsingTheirBankAccount() throws Exception {
         // Register the customer with DTU Pay
         dtuPayCustomer.setId(customerAdapter.register(dtuPayCustomer));
     }
@@ -101,7 +105,7 @@ public class PaymentSteps {
     }
 
     @And("the merchant is registered with DTU Pay using their bank account")
-    public void theMerchantIsRegisteredWithDTUPayUsingTheirBankAccount() {
+    public void theMerchantIsRegisteredWithDTUPayUsingTheirBankAccount() throws Exception {
         // Register the merchant with DTU Pay
         String merchantId = merchantAdapter.register(dtuPayMerchant);
         dtuPayMerchant.setId(merchantId);
@@ -140,6 +144,7 @@ public class PaymentSteps {
 
     @And("the customer's token is no longer valid")
     public void theCustomerSTokenIsNoLongerValid() throws Exception {
+//        var response = paymentAdapter.requestPayment(payment);
         assertThrows("Invalid Token", Exception.class, () -> paymentAdapter.requestPayment(payment));
     }
 
