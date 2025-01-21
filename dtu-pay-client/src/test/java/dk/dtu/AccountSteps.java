@@ -184,6 +184,14 @@ public class AccountSteps {
     @Before("@Account")
     public void beforeTests() {
         System.out.println("Clean up");
+        try{
+            Account emptyCprAccount = bankService.getAccountByCprNumber("testCprNumber");
+            if (emptyCprAccount != null) {
+                bankService.retireAccount(emptyCprAccount.getId());
+            }
+        }catch(BankServiceException_Exception e) {
+            System.err.println(e.getMessage());
+        }
         try {
             Account customerAccount = bankService.getAccountByCprNumber("250103-7220");
             if (customerAccount != null) {

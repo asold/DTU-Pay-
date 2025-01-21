@@ -73,7 +73,7 @@ public class TokenSteps {
         dtuPayCustomer.setId(UUID.randomUUID().toString());
     }
 
-    @Before
+    @Before("@Token")
     public void beforeTests() {
         System.out.println("Clean up before tests");
         try {
@@ -86,7 +86,7 @@ public class TokenSteps {
         }
     }
 
-    @After
+    @After("@Token")
     public void cleanUp() {
         System.out.println("Clean up after tests");
         try {

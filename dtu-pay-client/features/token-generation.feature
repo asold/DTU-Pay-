@@ -1,4 +1,5 @@
 #@author Simão Teixeira (s232431)
+@Token
 Feature: Token Generation
 
   Scenario: Successful token generation
@@ -35,4 +36,4 @@ Feature: Token Generation
     Given a customer not registered in DTUPay
     When the customer requests 1 tokens
     Then 0 tokens are generated for the customer
-    And the error message "Invalid Customer Account" is returned
+    And the customer receives the error message "Invalid Customer Account"
