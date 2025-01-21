@@ -1,4 +1,4 @@
-package dk.dtu.businesslogic.services.exceptions;
+package dk.dtu.businesslogic.exceptions;
 
 /**
  * Exception thrown when invalid token is used within the Token Service

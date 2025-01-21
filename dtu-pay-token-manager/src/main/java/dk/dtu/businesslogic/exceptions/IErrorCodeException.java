@@ -1,4 +1,4 @@
-package dk.dtu.businesslogic.services.exceptions;
+package dk.dtu.businesslogic.exceptions;
 
 /**
  * @author Simão Teixeira (s232431)
