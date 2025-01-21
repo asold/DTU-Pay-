@@ -1,5 +1,6 @@
 package dk.dtu;
 
+import dk.dtu.core.models.*;
 import dk.dtu.adapters.CustomerAdapter;
 import dk.dtu.adapters.MerchantAdapter;
 import dk.dtu.adapters.PaymentAdapter;
@@ -188,7 +189,7 @@ public class PaymentSteps {
         dtuPayMerchant.setId("unregistered-dtuPay-id");
     }
 
-    @Before
+    @Before("@Payment")
     public void beforeTests() {
         System.out.println("Clean up PyamentSteps before");
         try {
@@ -209,7 +210,8 @@ public class PaymentSteps {
             System.err.println(e.getMessage());
         }
     }
-    @After
+
+    @After("@Payment")
     public void cleanUp() {
         System.out.println("Clean up PyamentSteps after");
         try {

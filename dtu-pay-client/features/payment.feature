@@ -1,3 +1,4 @@
+@Payment
 Feature: Payment
 
   Scenario: Successful Payment
@@ -64,6 +65,7 @@ Feature: Payment
     When the merchant initiates a payment for 10 kr using the customer's token
     Then an error message "CreditorAccountNotFound" is returned
     And the balance of the customer at the bank is 1000 kr
+
 
   Scenario: Payment fails with a negative amount
     Given a customer with name "Susan", last name "Baldwin", and CPR "250103-7220"

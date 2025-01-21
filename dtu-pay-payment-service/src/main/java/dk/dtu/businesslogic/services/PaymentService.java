@@ -60,44 +60,47 @@ public final class PaymentService {
     }
 
     private void executePaymentIfAllEventsArrived(CorrelationId correlationId) {
-        // Verify if all events were received
-        var paymentCommand = pendingPaymentCommandsMap.get(correlationId);
-        if (paymentCommand.getCustomerBankAccountId() != null && paymentCommand.getMerchantBankAccountId() != null && paymentCommand.getAmount() != null)
-        {
-            // Here it means we have received all the data for a payment
-            // Execute Payment
-            try
+        synchronized (correlationId) {
+            // Verify if all events were received
+            var paymentCommand = pendingPaymentCommandsMap.get(correlationId);
+            if (paymentCommand.getCustomerBankAccountId() != null && paymentCommand.getMerchantBankAccountId() != null && paymentCommand.getAmount() != null)
             {
-                var paymentDescription = "Money transfer of amount:" + paymentCommand.getAmount();
-                bankService.transferMoneyFromTo(paymentCommand.getCustomerBankAccountId(), paymentCommand.getMerchantBankAccountId(), paymentCommand.getAmount(), paymentDescription);
-                // Because we took the payment id as the correlation id, we publish an event stating that
-                // the payment was successful for that correlation id, which effectively can be interpreted as a payment id.
-                var paymentResponse = new PaymentResponse(correlationId.getId(), true);
-                var paymentSucceededEvent = new Event("PaymentProcessed", correlationId, paymentResponse);
-                queue.publish(paymentSucceededEvent);
-            } catch (BankServiceException_Exception e)
-            {
-                var paymentResponse = new PaymentResponse(correlationId.getId(),false);
-                //Maybe the dependency on a text from the bank account is not that good here
-                if(e.getMessage().equals("Debtor account does not exist")){
-                    queue.publish(new Event("DebtorAccountNotFound", correlationId, "DebtorAccountNotFound"));
-                    return;
-                }
-                if(e.getMessage().equals("Creditor account does not exist")){
-                    queue.publish(new Event("CreditorAccountNotFound", correlationId, "CreditorAccountNotFound"));
-                    return;
-                }
-                if(e.getMessage().equals("Amount must be positive")){
-                    queue.publish(new Event("NegativeAmountRequested", correlationId, "NegativeAmountRequested"));
-                    return;
-                }
 
-                var paymentFailureEvent = new Event("PaymentProcessed",correlationId, paymentResponse);
+                // Here it means we have received all the data for a payment
+                // Execute Payment
+                try
+                {
+                    var paymentDescription = "Money transfer of amount:" + paymentCommand.getAmount();
+                    bankService.transferMoneyFromTo(paymentCommand.getCustomerBankAccountId(), paymentCommand.getMerchantBankAccountId(), paymentCommand.getAmount(), paymentDescription);
+                    // Because we took the payment id as the correlation id, we publish an event stating that
+                    // the payment was successful for that correlation id, which effectively can be interpreted as a payment id.
+                    var paymentResponse = new PaymentResponse(correlationId.getId(), true);
+                    var paymentSucceededEvent = new Event("PaymentProcessed", correlationId, paymentResponse);
+                    queue.publish(paymentSucceededEvent);
+                } catch (BankServiceException_Exception e)
+                {
+                    var paymentResponse = new PaymentResponse(correlationId.getId(),false);
+                    //Maybe the dependency on a text from the bank account is not that good here
+                    if(e.getMessage().equals("Debtor account does not exist")){
+                        queue.publish(new Event("DebtorAccountNotFound", correlationId, "DebtorAccountNotFound"));
+                        return;
+                    }
+                    if(e.getMessage().equals("Creditor account does not exist")){
+                        queue.publish(new Event("CreditorAccountNotFound", correlationId, "CreditorAccountNotFound"));
+                        return;
+                    }
+                    if(e.getMessage().equals("Amount must be positive")){
+                        queue.publish(new Event("NegativeAmountRequested", correlationId, "NegativeAmountRequested"));
+                        return;
+                    }
 
-                queue.publish(paymentFailureEvent);
+                    var paymentFailureEvent = new Event("PaymentProcessed",correlationId, paymentResponse);
+
+                    queue.publish(paymentFailureEvent);
+                }
+                // Here we make sure to clean any information related to the payment saga.
+                pendingPaymentCommandsMap.remove(correlationId);
             }
-            // Here we make sure to clean any information related to the payment saga.
-            pendingPaymentCommandsMap.remove(correlationId);
         }
     }
 }

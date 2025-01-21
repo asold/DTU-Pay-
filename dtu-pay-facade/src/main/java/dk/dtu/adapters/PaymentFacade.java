@@ -5,7 +5,6 @@ import dk.dtu.core.exceptions.InvalidPaymentException;
 import dk.dtu.core.exceptions.InvalidTokenException;
 import dk.dtu.core.models.Payment;
 import dk.dtu.core.models.PaymentResponse;
-import io.netty.util.concurrent.CompleteFuture;
 import jakarta.inject.Singleton;
 import messaging.CorrelationId;
 import messaging.Event;
@@ -13,9 +12,7 @@ import messaging.MessageQueue;
 import messaging.implementations.RabbitMqQueue;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 /**

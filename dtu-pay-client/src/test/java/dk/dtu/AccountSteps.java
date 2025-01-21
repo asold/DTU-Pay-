@@ -96,44 +96,6 @@ public class AccountSteps {
         assertEquals(dtuPayCustomer.getId(), deregisterCustomerIdResult);
     }
 
-
-    @Before
-    public void beforeTests() {
-        System.out.println("Clean up");
-        try {
-            Account customerAccount = bankService.getAccountByCprNumber("250103-7220");
-            if (customerAccount != null) {
-                bankService.retireAccount(customerAccount.getId());
-            }
-        }catch(BankServiceException_Exception e) {
-            System.err.println(e.getMessage());
-        }
-        try{
-            Account merchantAccount = bankService.getAccountByCprNumber("241902-7253");
-            if (merchantAccount != null) {
-                bankService.retireAccount(merchantAccount.getId());
-            }
-        }
-        catch (BankServiceException_Exception e) {
-            System.err.println(e.getMessage());
-        }
-    }
-    @After
-    public void cleanUp() {
-        try {
-            if (customerBankAccountNumber != null && !customerBankAccountNumber.equals("unregistered-account")) {
-                bankService.retireAccount(customerBankAccountNumber);
-            }
-
-            if (merchantBankAccountNumber != null && !merchantBankAccountNumber.equals("unregistered-account")) {
-                bankService.retireAccount(merchantBankAccountNumber);
-            }
-        } catch (BankServiceException_Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
     @Given("a accountTest merchant with name {string}, last name {string}, and CPR {string}")
     public void aAccountTestMerchantWithNameLastNameAndCPR(String firstName, String lastName, String cpr) {
         // Initialize the User model from the bank integration
@@ -216,5 +178,51 @@ public class AccountSteps {
     @And("the accountTest merchant is not registered with the bank")
     public void theAccountTestMerchantIsNotRegisteredWithTheBank() {
         dtuPayMerchant.setBankAccountNumber("");
+    }
+
+
+    @Before("@Account")
+    public void beforeTests() {
+        System.out.println("Clean up");
+        try{
+            Account emptyCprAccount = bankService.getAccountByCprNumber("testCprNumber");
+            if (emptyCprAccount != null) {
+                bankService.retireAccount(emptyCprAccount.getId());
+            }
+        }catch(BankServiceException_Exception e) {
+            System.err.println(e.getMessage());
+        }
+        try {
+            Account customerAccount = bankService.getAccountByCprNumber("250103-7220");
+            if (customerAccount != null) {
+                bankService.retireAccount(customerAccount.getId());
+            }
+        }catch(BankServiceException_Exception e) {
+            System.err.println(e.getMessage());
+        }
+        try{
+            Account merchantAccount = bankService.getAccountByCprNumber("241902-7253");
+            if (merchantAccount != null) {
+                bankService.retireAccount(merchantAccount.getId());
+            }
+        }
+        catch (BankServiceException_Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+    @After("@Account")
+    public void cleanUp() {
+        try {
+            if (customerBankAccountNumber != null && !customerBankAccountNumber.equals("unregistered-account")) {
+                bankService.retireAccount(customerBankAccountNumber);
+            }
+
+            if (merchantBankAccountNumber != null && !merchantBankAccountNumber.equals("unregistered-account")) {
+                bankService.retireAccount(merchantBankAccountNumber);
+            }
+        } catch (BankServiceException_Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }
