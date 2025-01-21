@@ -2,6 +2,9 @@ package dk.dtu.businesslogic.services;
 
 import java.math.BigDecimal;
 
+/**
+ * @author  Zavidei Maxim  s240394
+ */
 public final class CreatePaymentCommand {
 
     private String merchantBankAccountId;

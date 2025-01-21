@@ -1,12 +1,10 @@
 package dk.dtu;
 
 import dk.dtu.adapters.CustomerFacade;
+import dk.dtu.core.exceptions.AccountRegistrationException;
 import dk.dtu.core.models.Customer;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.net.URI;
@@ -26,10 +24,29 @@ public class CustomerResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response registerCustomer(Customer customer) throws URISyntaxException, ExecutionException, InterruptedException {
+    public Response registerCustomer(Customer customer) {
 
-        String customerId = customerFacade.registerCustomer(customer);
+        try {
+            String customerId = customerFacade.registerCustomer(customer);
+            return Response.created(new URI("/customers/" + customerId)).entity(customerId).build();
+        } catch (AccountRegistrationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (URISyntaxException | ExecutionException | InterruptedException ex) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+        }
+    }
+
+    @DELETE
+    @Path("{id}")
+
+    public Response deregisterCustomer(@PathParam("id") String id) throws URISyntaxException, ExecutionException, InterruptedException {
+
+        String customerId = customerFacade.deregisterCustomer(id);
         return Response.created(new URI("/customers/" + customerId)).entity(customerId).build();
     }
+
+
+
+
 
 }

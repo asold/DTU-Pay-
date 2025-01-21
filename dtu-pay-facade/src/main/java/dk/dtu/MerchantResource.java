@@ -2,13 +2,11 @@ package dk.dtu;
 
 import dk.dtu.adapters.CustomerFacade;
 import dk.dtu.adapters.MerchantFacade;
+import dk.dtu.core.exceptions.AccountRegistrationException;
 import dk.dtu.core.models.Customer;
 import dk.dtu.core.models.Merchant;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -26,9 +24,26 @@ public class MerchantResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response registerCustomer(Merchant merchant) throws URISyntaxException, ExecutionException, InterruptedException {
+    public Response registerCustomer(Merchant merchant) {
 
-        String merchantId = merchantFacade.registerMerchant(merchant);
+        try {
+            String merchantId = merchantFacade.registerMerchant(merchant);
+            return Response.created(new URI("/merchants/" + merchantId)).entity(merchantId).build();
+        } catch (AccountRegistrationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (URISyntaxException | ExecutionException | InterruptedException ex) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex.getMessage()).build();
+        }
+
+    }
+
+    @DELETE
+    @Path("{id}")
+    public Response deregisterCustomer(@PathParam("id") String id) throws URISyntaxException, ExecutionException, InterruptedException {
+
+        String merchantId = merchantFacade.deregisterMerchant(id);
         return Response.created(new URI("/merchants/" + merchantId)).entity(merchantId).build();
     }
+
+
 }

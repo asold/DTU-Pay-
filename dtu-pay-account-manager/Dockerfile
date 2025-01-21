@@ -4,6 +4,7 @@ COPY messaging-utilities /app/messaging-utilities
 RUN mvn clean install -f /app/messaging-utilities/pom.xml
 COPY dtu-pay-account-manager/pom.xml .
 COPY dtu-pay-account-manager/src ./src
+COPY dtu-pay-account-manager/features ./features
 RUN mvn clean package
 
 FROM eclipse-temurin:21
