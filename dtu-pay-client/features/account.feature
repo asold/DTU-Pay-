@@ -1,3 +1,4 @@
+@Account
 Feature: Account Feature
 
   Scenario: Successful customer registration on DTUPay

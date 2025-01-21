@@ -128,8 +128,6 @@ public class PaymentSteps {
 
     @Then("the payment is successful")
     public void thePaymentIsSuccessful() {
-        test = "test";
-
         assertTrue(paymentResponse.successful());
     }
 
@@ -153,7 +151,6 @@ public class PaymentSteps {
 
     @Then("the payment is not successful")
     public void thePaymentIsNotSuccessful() {
-        System.out.println(test);
         assertFalse(paymentResponse.successful());
     }
 
@@ -192,9 +189,9 @@ public class PaymentSteps {
         dtuPayMerchant.setId("unregistered-dtuPay-id");
     }
 
-    @Before
+    @Before("@Payment")
     public void beforeTests() {
-        System.out.println("Clean up");
+        System.out.println("Clean up before");
         try {
             Account customerAccount = bankService.getAccountByCprNumber("250103-7220");
             if (customerAccount != null) {
@@ -213,7 +210,8 @@ public class PaymentSteps {
             System.err.println(e.getMessage());
         }
     }
-    @After
+
+    @After("@Payment")
     public void cleanUp() {
         try {
             if (customerBankAccountNumber != null && !customerBankAccountNumber.equals("unregistered-account")) {
