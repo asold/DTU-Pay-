@@ -9,6 +9,7 @@ import messaging.MessageQueue;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -40,11 +41,13 @@ public class ReportService {
 
 	public void retrievedMerchantIdAmount(Event event) {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+		UUID tokenId = event.getArgument(1, UUID.class);
 		String merchantId = event.getArgument(2, String.class);
 		BigDecimal amount = event.getArgument(3, BigDecimal.class);
 		var pendingPaymentLog = pendingPaymentLogs.computeIfAbsent(correlationId, c -> new PaymentLog());
 		pendingPaymentLog.setMerchantId(merchantId);
 		pendingPaymentLog.setAmount(amount);
+		pendingPaymentLog.setTokenId(tokenId);
 		storePaymentLogIfCompleted(correlationId);
 	}
 
@@ -70,7 +73,7 @@ public class ReportService {
 	private void storePaymentLogIfCompleted(CorrelationId correlationId) {
 		// Verify if all events were received
 		var pendingPaymentLog = pendingPaymentLogs.get(correlationId);
-		if (pendingPaymentLog.getMerchantId() != null && pendingPaymentLog.getAmount() != null && pendingPaymentLog.getCustomerId() != null && pendingPaymentLog.isPaymentSuccessful() == true) {
+		if (pendingPaymentLog.getMerchantId() != null && pendingPaymentLog.getAmount() != null && pendingPaymentLog.getCustomerId() != null && pendingPaymentLog.getTokenId()!=null && pendingPaymentLog.isPaymentSuccessful() == true) {
 			reportRepository.addPaymentLog(pendingPaymentLog);
 			pendingPaymentLogs.remove(correlationId);
 		}
