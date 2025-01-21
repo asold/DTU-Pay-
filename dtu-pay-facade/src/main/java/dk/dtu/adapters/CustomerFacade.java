@@ -1,7 +1,6 @@
 package dk.dtu.adapters;
 
 import dk.dtu.core.exceptions.AccountRegistrationException;
-import dk.dtu.core.exceptions.InvalidTokenException;
 import dk.dtu.core.models.Customer;
 import jakarta.inject.Singleton;
 import messaging.CorrelationId;
@@ -47,9 +46,11 @@ public class CustomerFacade {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         String error = e.getArgument(1, String.class);
         System.out.println("Policy customer registration failed: " + error);
-        CompletableFuture<String> future = customerRequests.get(correlationId);
-        future.completeExceptionally(new AccountRegistrationException(error));
-        customerRequests.remove(correlationId);
+        CompletableFuture<String> future = customerRequests.getOrDefault(correlationId, null);
+        if (future != null) {
+            future.completeExceptionally(new AccountRegistrationException(error));
+            customerRequests.remove(correlationId);
+        }
     }
 
     private void policyCustomerDeregistered(Event e) {

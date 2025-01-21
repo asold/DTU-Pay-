@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 
 @Singleton
 public class MerchantFacade {
-    private Map<CorrelationId, CompletableFuture<String>> merchantRequests = new ConcurrentHashMap<>();
+    private final Map<CorrelationId, CompletableFuture<String>> merchantRequests = new ConcurrentHashMap<>();
 
     MessageQueue queue;
 
@@ -33,9 +33,11 @@ public class MerchantFacade {
     private void policyMerchantRegistrationFailed(Event event) {
         CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
         String error = event.getArgument(1, String.class);
-        CompletableFuture<String> future = merchantRequests.get(correlationId);
-        future.completeExceptionally(new AccountRegistrationException(error));
-        merchantRequests.remove(correlationId);
+        CompletableFuture<String> future = merchantRequests.getOrDefault(correlationId, null);
+        if (future != null) {
+            future.completeExceptionally(new AccountRegistrationException(error));
+            merchantRequests.remove(correlationId);
+        }
     }
 
     private void policyMerchantDeregistered(Event event) {
