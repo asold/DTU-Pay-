@@ -12,8 +12,8 @@ import java.util.Set;
  */
 public class AccountRepository {
 
-    private Set<Customer> customers = new HashSet<>();
-    private Set<Merchant> merchants = new HashSet<>();
+    private final Set<Customer> customers = new HashSet<>();
+    private final Set<Merchant> merchants = new HashSet<>();
 
     public AccountRepository() {}
 
@@ -23,6 +23,14 @@ public class AccountRepository {
 
     public void addMerchant(Merchant merchant) {
         merchants.add(merchant);
+    }
+
+    public void deleteCustomer(String customerId) {
+        customers.removeIf(customer -> customer.getId().equals(customerId));
+    }
+
+    public void deleteMerchant(String merchantId) {
+        merchants.removeIf(merchant -> merchant.getId().equals(merchantId));
     }
 
     public Optional<Customer> getCustomerById(String id) {

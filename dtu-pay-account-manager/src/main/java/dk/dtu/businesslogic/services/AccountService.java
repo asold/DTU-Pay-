@@ -6,33 +6,34 @@ import dk.dtu.businesslogic.models.Merchant;
 import messaging.CorrelationId;
 import messaging.Event;
 import messaging.MessageQueue;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
-import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author  Andrei Soldan 243873
  */
 public class AccountService {
 
-	private MessageQueue queue;
-	private AccountRepository accountRepository;
-
-	private static final Logger logger = Logger.getLogger(AccountService.class.getName());
+	private final MessageQueue queue;
+	private final AccountRepository accountRepository;
 
 	public AccountService(MessageQueue q) {
 		this.queue = q;
 		queue.addHandler("CustomerAccountRegistrationRequested", this::policyCustomerRegistrationRequested);
 		queue.addHandler("MerchantAccountRegistrationRequested", this::policyMerchantRegistrationRequested);
 
+		queue.addHandler("CustomerAccountDeregistrationRequested", this::policyCustomerDeregistrationRequested);
+		queue.addHandler("MerchantAccountDeregistrationRequested", this::policyMerchantDeregistrationRequested);
+
 		queue.addHandler("TokenValidated", this::tokenValidated);
 		queue.addHandler("PaymentRequested", this::paymentRequested);
 
 		accountRepository = new AccountRepository();
 	}
-	
-	/* Policies */
 
+	/* Policies */
 
 	/**
 	 * Handles the 'CustomerAccountRegistrationRequested' event
@@ -41,6 +42,11 @@ public class AccountService {
 	public void policyCustomerRegistrationRequested(Event event) {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		var customer = event.getArgument(1, Customer.class);
+		String customerCheck = checkEntity(customer.getFirstName(), customer.getLastName(), customer.getCpr(), customer.getBankAccountNumber());
+		if (!"OK".equals(customerCheck)) {
+			queue.publish(new Event("CustomerRegistrationFailed", correlationId, customerCheck));
+			return;
+		}
 		var cid = createCustomerAccount(customer);
 		queue.publish(new Event("CustomerRegistered", correlationId, cid));
 	}
@@ -52,8 +58,35 @@ public class AccountService {
 	public void policyMerchantRegistrationRequested(Event event) {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		var merchant = event.getArgument(1, Merchant.class);
+		String merchantCheck = checkEntity(merchant.getFirstName(), merchant.getLastName(), merchant.getCpr(), merchant.getBankAccountNumber());
+		if (!"OK".equals(merchantCheck)) {
+			queue.publish(new Event("MerchantRegistrationFailed", correlationId, merchantCheck));
+			return;
+		}
 		var mid = createMerchantAccount(merchant);
 		queue.publish(new Event("MerchantRegistered", correlationId, mid));
+	}
+
+	/**
+	 * Handles the 'CustomerAccountDeregistrationRequested' event
+	 * @param event the event
+	 */
+	public void policyCustomerDeregistrationRequested(Event event) {
+		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+		var customerId = event.getArgument(1, String.class);
+		deregisterCustomer(customerId);
+		queue.publish(new Event("CustomerDeregistered", correlationId, customerId));
+	}
+
+	/**
+	 * Handles the 'MerchantAccountDeregistrationRequested' event
+	 * @param event the event
+	 */
+	public void policyMerchantDeregistrationRequested(Event event) {
+		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+		var merchantId = event.getArgument(1, String.class);
+		deregisterMerchant(merchantId);
+		queue.publish(new Event("MerchantDeregistered", correlationId, merchantId));
 	}
 
 
@@ -72,7 +105,7 @@ public class AccountService {
 	 * Handles the 'PaymentRequested' event
 	 * @param event the event
 	 */
-	private void paymentRequested(Event event) {
+	public void paymentRequested(Event event) {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		var merchantId = event.getArgument(2, String.class);
 		retrieveMerchantBankAccount(merchantId, correlationId);
@@ -84,7 +117,7 @@ public class AccountService {
 	 * Store the given customer with a new ID and publish a 'CustomerRegistered' event
 	 * @param customer the customer
 	 */
-	private String createCustomerAccount(Customer customer) {
+	public String createCustomerAccount(Customer customer) {
 		String cid = UUID.randomUUID().toString();
 		customer.setId(cid);
 		accountRepository.addCustomer(customer);
@@ -94,13 +127,29 @@ public class AccountService {
 
 	/**
 	 * Store the given merchant with a new ID and publish a 'MerchantRegistered' event
-	 * @param merchant the customer
+	 * @param merchant the merchant
 	 */
-	private String createMerchantAccount(Merchant merchant) {
+	public String createMerchantAccount(Merchant merchant) {
 		String mid = UUID.randomUUID().toString();
 		merchant.setId(mid);
 		accountRepository.addMerchant(merchant);
 		return mid;
+	}
+
+	/**
+	 * Delete the given customer
+	 * @param customerId the customer ID
+	 */
+	public void deregisterCustomer(String customerId) {
+		accountRepository.deleteCustomer(customerId);
+	}
+
+	/**
+	 * Delete the give merchant
+	 * @param merchantId the merchant ID
+	 */
+	public void deregisterMerchant(String merchantId) {
+		accountRepository.deleteMerchant(merchantId);
 	}
 
 	/**
@@ -109,10 +158,11 @@ public class AccountService {
 	 * @param correlationId the correlation ID
 	 * @throws RuntimeException if there is no customer with the given ID
 	 */
-	private void retrieveCustomerBankAccount(String customerId, CorrelationId correlationId) {
-		var customerAccount = accountRepository.getCustomerById(customerId)
-				.orElseThrow(() -> new RuntimeException("Customer not found"));
-		queue.publish(new Event("CustomerBankAccountRetrieved", correlationId ,customerAccount.getBankAccountNumber()));
+	public void retrieveCustomerBankAccount(String customerId, CorrelationId correlationId) {
+		accountRepository.getCustomerById(customerId).ifPresentOrElse(
+				customer -> queue.publish(new Event("CustomerBankAccountRetrieved", correlationId, customer.getBankAccountNumber())),
+				() -> queue.publish(new Event("CustomerAccountNotFound", correlationId , "Customer not found"))
+		);
 	}
 
 	/**
@@ -121,14 +171,47 @@ public class AccountService {
 	 * @param correlationId the correlation ID
 	 * @throws RuntimeException if there is no merchant with the given ID
 	 */
-	private void retrieveMerchantBankAccount(String merchantId, CorrelationId correlationId) {
-		var merchantAccount = accountRepository.getMerchantById(merchantId)
-				.orElseThrow(() -> {
-					queue.publish(new Event("MerchantAccountNotFound", correlationId, "Merchant not found"));
-					return new RuntimeException("Merchant not found");
-				});
+	public void retrieveMerchantBankAccount(String merchantId, CorrelationId correlationId) {
 
-		queue.publish(new Event("MerchantBankAccountRetrieved", correlationId, merchantAccount.getBankAccountNumber()));
+		accountRepository.getMerchantById(merchantId).ifPresentOrElse(merchant ->
+				queue.publish(new Event("MerchantBankAccountRetrieved",correlationId, merchant.getBankAccountNumber())),
+				() -> queue.publish(new Event("MerchantAccountNotFound", correlationId , "Merchant not found"))
+		);
 	}
 
+
+	/**
+	 * Checks if the given entity has invalid values
+	 * @param firstName the first name of the entity
+	 * @param lastName the lastName of the entity
+	 * @param cpr the cpr number of the entity
+	 * @param bankAccountNumber the bank account number of the entity
+	 * @return the invalid value as a string. If there's no invalid fields, it returns "OK"
+	 */
+	private String checkEntity(String firstName, String lastName, String cpr, String bankAccountNumber) {
+		List<String> invalidFields = checkStringValues(
+				List.of(
+					Pair.of("first name", firstName),
+					Pair.of("last name", lastName),
+					Pair.of("CPR", cpr),
+					Pair.of("bank account number", bankAccountNumber)
+				)
+		);
+		if (!invalidFields.isEmpty()) {
+			return "Invalid " + invalidFields.getFirst();
+		}
+		return "OK";
+	}
+
+	/**
+	 * Check the input pairs for null or empty values
+	 * @param valuePairs the values pair
+	 * @return the list of keys where the value is empty
+	 */
+    private List<String> checkStringValues(List<Pair<String, String>> valuePairs) {
+		 return valuePairs.stream()
+				 .filter(p -> p.getValue() == null || p.getValue().isEmpty())
+				 .map(Pair::getKey)
+				 .collect(Collectors.toList());
+	}
 }
