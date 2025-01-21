@@ -1,7 +1,7 @@
 package dk.dtu.adapters;
 
-import dk.dtu.core.models.TokenResult;
 import com.google.gson.reflect.TypeToken;
+import dk.dtu.core.models.TokenResult;
 import jakarta.inject.Singleton;
 import messaging.CorrelationId;
 import messaging.Event;

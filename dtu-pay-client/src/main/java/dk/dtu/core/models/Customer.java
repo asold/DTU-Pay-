@@ -90,6 +90,10 @@ public final class Customer {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public void addTokenResultToList(TokenResult tokenResult) {
+        tokens.add(tokenResult);
+    }
 }
 
 

@@ -1,5 +1,7 @@
 package dk.dtu.adapters;
 
+import dk.dtu.core.exceptions.AccountRegistrationException;
+import dk.dtu.core.exceptions.InvalidTokenException;
 import dk.dtu.core.models.Customer;
 import jakarta.inject.Singleton;
 import messaging.CorrelationId;
@@ -18,7 +20,7 @@ import java.util.concurrent.ExecutionException;
 @Singleton
 public class CustomerFacade {
 
-    private Map<CorrelationId, CompletableFuture<String>> registerCustomerRequests = new ConcurrentHashMap<>();
+    private final Map<CorrelationId, CompletableFuture<String>> customerRequests = new ConcurrentHashMap<>();
 
     MessageQueue queue;
 
@@ -29,21 +31,47 @@ public class CustomerFacade {
     public CustomerFacade(MessageQueue q) {
         queue = q;
         q.addHandler("CustomerRegistered", this::policyCustomerRegistered);
+        q.addHandler("CustomerDeregistered", this::policyCustomerDeregistered);
+        q.addHandler("CustomerRegistrationFailed", this::policyCustomerRegistrationFailed);
     }
 
     private void policyCustomerRegistered(Event e) {
         System.out.println("Policy customer registered");
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         String customerId = e.getArgument(1, String.class);
-        registerCustomerRequests.get(correlationId).complete(customerId);
-        registerCustomerRequests.remove(correlationId);
+        customerRequests.get(correlationId).complete(customerId);
+        customerRequests.remove(correlationId);
     }
 
-    public String registerCustomer(Customer customer) throws InterruptedException, ExecutionException {
+    private void policyCustomerRegistrationFailed(Event e) {
+        CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
+        String error = e.getArgument(1, String.class);
+        System.out.println("Policy customer registration failed: " + error);
+        CompletableFuture<String> future = customerRequests.get(correlationId);
+        future.completeExceptionally(new AccountRegistrationException(error));
+        customerRequests.remove(correlationId);
+    }
+
+    private void policyCustomerDeregistered(Event e) {
+        CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
+        String customerId = e.getArgument(1, String.class);
+        customerRequests.get(correlationId).complete(customerId);
+        customerRequests.remove(correlationId);
+    }
+
+    public String registerCustomer(Customer customer) throws InterruptedException, ExecutionException, AccountRegistrationException {
         CorrelationId correlationId = new CorrelationId();
         CompletableFuture<String> registerCustomerRequest = new CompletableFuture<>();
-        registerCustomerRequests.put(correlationId, registerCustomerRequest);
-        queue.publish(new Event("CustomerAccountRegistrationRequested",correlationId, customer));
+        customerRequests.put(correlationId, registerCustomerRequest);
+        queue.publish(new Event("CustomerAccountRegistrationRequested", correlationId, customer));
         return registerCustomerRequest.get();
+    }
+
+    public String deregisterCustomer(String customerId) throws InterruptedException, ExecutionException {
+        CorrelationId correlationId = new CorrelationId();
+        CompletableFuture<String> deregisterCustomerRequest = new CompletableFuture<>();
+        customerRequests.put(correlationId, deregisterCustomerRequest);
+        queue.publish(new Event("CustomerAccountDeregistrationRequested", correlationId, customerId));
+        return deregisterCustomerRequest.get();
     }
 }

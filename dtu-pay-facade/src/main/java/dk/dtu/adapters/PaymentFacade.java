@@ -1,5 +1,7 @@
 package dk.dtu.adapters;
 
+import dk.dtu.core.exceptions.AccountNotFoundException;
+import dk.dtu.core.exceptions.InvalidPaymentException;
 import dk.dtu.core.exceptions.InvalidTokenException;
 import dk.dtu.core.models.Payment;
 import dk.dtu.core.models.PaymentResponse;
@@ -16,7 +18,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-
+/**
+ * @author  Andrei Soldan 243873
+ */
 @Singleton
 public class PaymentFacade {
 
@@ -31,9 +35,13 @@ public class PaymentFacade {
         queue = q;
         q.addHandler("PaymentProcessed", this::policyPaymentProcessed);
         q.addHandler("TokenValidationFailed", this::policyTokenValidationFailed);
+        q.addHandler("DebtorAccountNotFound", this::policyDebtorAccountNotFound);
+        q.addHandler("CreditorAccountNotFound", this::policyCreditorAccountNotFound);
+        q.addHandler("NegativeAmountRequested", this::policyNegativeAmountRequested);
+        q.addHandler("MerchantAccountNotFound", this::policyMerchantNotFound);
     }
 
-    private void policyPaymentProcessed(Event event) {
+    public void policyPaymentProcessed(Event event) {
         CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
         PaymentResponse paymentResponse = event.getArgument(1, PaymentResponse.class);
 
@@ -42,12 +50,45 @@ public class PaymentFacade {
         paymentRequests.remove(correlationId);
     }
 
-    private void policyTokenValidationFailed(Event event) {
+    public void policyTokenValidationFailed(Event event) {
         CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
         String message = event.getArgument(1, String.class);
 
         CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
         future.completeExceptionally(new InvalidTokenException(message));
+        paymentRequests.remove(correlationId);
+    }
+
+    public void policyDebtorAccountNotFound(Event event) {
+        CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+        String message = event.getArgument(1, String.class);
+
+        CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
+        future.completeExceptionally(new InvalidPaymentException(message));
+        paymentRequests.remove(correlationId);
+    }
+
+    public void policyCreditorAccountNotFound(Event event) {
+        CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+        String message = event.getArgument(1, String.class);
+        CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
+        future.completeExceptionally(new InvalidPaymentException(message));
+        paymentRequests.remove(correlationId);
+    }
+
+    public void policyNegativeAmountRequested(Event event) {
+        CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+        String message = event.getArgument(1, String.class);
+        CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
+        future.completeExceptionally(new InvalidPaymentException(message));
+        paymentRequests.remove(correlationId);
+    }
+
+    public void policyMerchantNotFound(Event event) {
+        CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+        String message = event.getArgument(1, String.class);
+        CompletableFuture<PaymentResponse> future = paymentRequests.get(correlationId);
+        future.completeExceptionally(new AccountNotFoundException(message));
         paymentRequests.remove(correlationId);
     }
 
@@ -59,11 +100,15 @@ public class PaymentFacade {
         paymentRequests.put(correlationId, paymentResponse);
         //Create a new PaymentID / Correlation ID
         queue.publish(new Event("PaymentRequested",
-                correlationId ,
+                correlationId,
                 payment.getToken(),
                 payment.getMerchantId(),
                 payment.getAmount()));
         return paymentResponse.get();
+    }
+
+    public Map<CorrelationId, CompletableFuture<PaymentResponse>> getPaymentRequests() {
+        return paymentRequests;
     }
 
 }

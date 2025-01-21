@@ -14,11 +14,22 @@ public final class MerchantAdapter {
 
     private final Client client = ClientBuilder.newBuilder().build();
 
-    public String register(Merchant dtuPayMerchant) {
+    public String register(Merchant dtuPayMerchant) throws Exception {
         Response response = client.target("http://localhost:8082/merchants")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .post(Entity.json(dtuPayMerchant));
 
+        if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
+            throw new Exception(response.readEntity(String.class));
+        }
+
+        return response.readEntity(String.class);
+    }
+
+    public String deregister(String  id) {
+        Response response = client.target("http://localhost:8082/merchants/" + id)
+                .request(MediaType.APPLICATION_JSON)
+                .delete();
         return response.readEntity(String.class);
     }
 }
