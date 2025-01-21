@@ -1,13 +1,13 @@
 package dk.dtu.businesslogic.services;
 
-import dk.dtu.businesslogic.repositories.AccountRepository;
 import dk.dtu.businesslogic.models.Customer;
 import dk.dtu.businesslogic.models.Merchant;
+import dk.dtu.businesslogic.repositories.AccountRepository;
 import messaging.CorrelationId;
 import messaging.Event;
 import messaging.MessageQueue;
 
-import java.util.*;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 /**
@@ -24,6 +24,7 @@ public class AccountService {
 		this.queue = q;
 		queue.addHandler("CustomerAccountRegistrationRequested", this::policyCustomerRegistrationRequested);
 		queue.addHandler("MerchantAccountRegistrationRequested", this::policyMerchantRegistrationRequested);
+		queue.addHandler("TokensRequested", this::policyTokensRequested);
 
 		queue.addHandler("TokenValidated", this::tokenValidated);
 		queue.addHandler("PaymentRequested", this::paymentRequested);
@@ -56,6 +57,22 @@ public class AccountService {
 		queue.publish(new Event("MerchantRegistered", correlationId, mid));
 	}
 
+	/**
+	 * Handles the TokensRequested event Publishes an event handled by the token manager informing if
+	 * the account requesting the tokens exists or not
+	 *
+	 * @param event Event
+	 * @author Simão Teixeira (s232431)
+	 */
+	public void policyTokensRequested(Event event) {
+		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
+		String customerId = event.getArgument(1, String.class);
+		queue.publish(
+				new Event(
+						"CustomerAccountValidated",
+						correlationId,
+						accountRepository.getCustomerById(customerId).isPresent()));
+	}
 
 	/**
 	 * Handles the 'TokenValidated' event
