@@ -13,14 +13,11 @@ Feature: Reporting
     Then the report with 2 payment(s) is generated successfully
     And the report contains the given 2 payment(s)
 
-  #    ReportRepository  must be cleared of PaymentLog before running this test succesfully.
-  #    Remove PaymentLog(s) when deregistrerer Customer, Merchant, or redefine scenario.
-
-#  Scenario: Successful manager report generation
-#    Given 3 payment between a customer and a merchant
-#    When the manager requests for a report
-#    Then the report with 3 payment(s) is generated successfully
-#    And the report contains the given 3 payment(s)
+  Scenario: Successful manager report generation
+    Given 3 payment between a customer and a merchant
+    When the manager requests for a report
+    Then A report with all payment(s) is generated successfully
+    And the report contains at least given 3 payment(s)
 
   #    To implement this Scenario correctly ReportService must publish events to AccountManager to check
   #    if MerchantID is valid. ReportService does not know if MerchantID is in the system, only that

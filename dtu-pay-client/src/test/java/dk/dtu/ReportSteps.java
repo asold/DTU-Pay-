@@ -91,7 +91,7 @@ public class ReportSteps {
 
         dtuPayCustomer.setId(customerAdapter.register(dtuPayCustomer));
 
-        customerTokens = customerAdapter.getTokens(dtuPayCustomer.getId(), 2 );
+        customerTokens = customerAdapter.getTokens(dtuPayCustomer.getId(), 3 );
         dtuPayCustomer.setTokens(customerTokens);
 
         // Initialize the User model from the bank integration
@@ -178,6 +178,22 @@ public class ReportSteps {
     public void theManagerRequestsForAReport() {
         receivedLogs = reportAdapter.getManagerReport();
 
+    }
+
+    @Then("A report with all payment\\(s) is generated successfully")
+    public void aReportWithAllPaymentSIsGeneratedSuccessfully() {
+        for (int i = 0; i < receivedLogs.size(); i++) {
+            PaymentLog log = receivedLogs.get(i);
+            assertNotNull(log.getAmount());
+            assertNotNull(log.getCustomerId());
+            assertNotNull(log.getMerchantId());
+            assertNotNull(log.getTokenId());
+        }
+    }
+
+    @And("the report contains at least given {int} payment\\(s)")
+    public void theReportContainsAtLeastGivenPaymentS(int numberOfPaymentsInTheReport) {
+        assertTrue(numberOfPaymentsInTheReport <= receivedLogs.size());
     }
 
 }
