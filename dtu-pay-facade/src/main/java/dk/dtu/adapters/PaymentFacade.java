@@ -103,7 +103,6 @@ public class PaymentFacade {
         CompletableFuture<PaymentResponse> paymentResponse = new CompletableFuture<>();
 
         paymentRequests.put(correlationId, paymentResponse);
-        //Create a new PaymentID / Correlation ID
         queue.publish(new Event("PaymentRequested",
                 correlationId,
                 payment.getToken(),

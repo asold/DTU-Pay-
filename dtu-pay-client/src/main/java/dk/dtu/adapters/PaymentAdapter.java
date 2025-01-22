@@ -11,7 +11,7 @@ import jakarta.ws.rs.core.Response;
 import java.util.UUID;
 
 /**
- * Driven adapter responsible for abstracting inter-process communication related to any payment use-cases and scenarios.
+ * @author Andrei Soldan s243873
  */
 public final class PaymentAdapter {
 

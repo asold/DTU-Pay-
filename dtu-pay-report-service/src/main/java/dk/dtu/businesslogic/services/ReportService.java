@@ -49,6 +49,7 @@ public class ReportService {
 		pendingPaymentLog.setAmount(amount);
 		pendingPaymentLog.setTokenId(tokenId);
 		storePaymentLogIfCompleted(correlationId);
+
 	}
 
 	public void retrievedCustomerId(Event event) {
@@ -57,17 +58,19 @@ public class ReportService {
 		var pendingPaymentLog = pendingPaymentLogs.computeIfAbsent(correlationId, c -> new PaymentLog());
 		pendingPaymentLog.setCustomerId(customerId);
 		storePaymentLogIfCompleted(correlationId);
+
 	}
 
 	public void retrievedPaymentSuccessful(Event event) {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		boolean paymentSuccessful = event.getArgument(1, PaymentResponse.class).successful();
 		var pendingPaymentLog = pendingPaymentLogs.computeIfAbsent(correlationId, c -> new PaymentLog());
-		if(paymentSuccessful)
+		if(paymentSuccessful){
 			pendingPaymentLog.setPaymentSuccessful(paymentSuccessful);
-		else
+			storePaymentLogIfCompleted(correlationId);
+		}else{
 			pendingPaymentLogs.remove(correlationId);
-		storePaymentLogIfCompleted(correlationId);
+		}
 	}
 
 	private void storePaymentLogIfCompleted(CorrelationId correlationId) {
@@ -77,10 +80,6 @@ public class ReportService {
 			reportRepository.addPaymentLog(pendingPaymentLog);
 			pendingPaymentLogs.remove(correlationId);
 		}
-//		if (pendingPaymentLog.getMerchantId() != null && pendingPaymentLog.getAmount() != null && pendingPaymentLog.getCustomerId() != null && pendingPaymentLog.getTokenId()!=null && pendingPaymentLog.isPaymentSuccessful() == true) {
-//			reportRepository.addPaymentLog(pendingPaymentLog);
-//			pendingPaymentLogs.remove(correlationId);
-//		}
 	}
 
 	private void retrieveCustomerReport(Event event) {
@@ -94,6 +93,8 @@ public class ReportService {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
 		String merchantId = event.getArgument(1, String.class);
 		List<PaymentLog> paymentLogs = reportRepository.getPaymentLogsByMerchantId(merchantId);
+
+
 		queue.publish(new Event("ReportGenerated", correlationId, paymentLogs));
 	}
 
