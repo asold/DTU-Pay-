@@ -12,8 +12,7 @@ for service in messaging-utilities dtu-pay-account-manager dtu-pay-facade dtu-pa
 done
 
 # Build and start Docker containers
-docker compose build --no-cache
-docker compose up -d
+docker-compose build --no-cache && docker-compose up -d
 sleep 5
 
 # Navigate to the client directory

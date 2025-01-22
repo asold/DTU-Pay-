@@ -17,7 +17,7 @@ public class PaymentLog {
 
 
     public PaymentLog() {
-
+        this.paymentSuccessful = false;
     }
 
     public UUID getTokenId() {
@@ -62,7 +62,7 @@ public class PaymentLog {
 
     public boolean allowsExecution() {
         if (merchantId != null && tokenId != null && amount != null && customerId != null
-                && !paymentSuccessful && !executed.get()) {
+                && paymentSuccessful && !executed.get()) {
             return executed.compareAndSet(false, true);
         }
         return false;

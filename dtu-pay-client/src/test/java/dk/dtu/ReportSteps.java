@@ -148,13 +148,13 @@ public class ReportSteps {
     }
 
     @When("the customer requests for a report")
-    public void theCustomerRequestsForAReport() {
+    public void theCustomerRequestsForAReport() throws InterruptedException {
         receivedLogs = reportAdapter.getCustomerReport(dtuPayCustomer.getId());
     }
 
     @Then("the report with {int} payment\\(s) is generated successfully")
-    public void theReportWithPaymentSIsGeneratedSuccessfully(int arg0) {
-    assertEquals(receivedLogs.size(), arg0);
+    public void theReportWithPaymentSIsGeneratedSuccessfully(int numberOfPaymentsInTheReport) {
+    assertEquals(numberOfPaymentsInTheReport, receivedLogs.size());
     }
 
     @And("the report contains the given {int} payment\\(s)")
@@ -169,7 +169,7 @@ public class ReportSteps {
    }
    //Scenario: Successful merchant report generation
     @When("the merchant requests for a report")
-    public void theMerchantRequestsForAReport() {
+    public void theMerchantRequestsForAReport() throws InterruptedException {
         receivedLogs = reportAdapter.getMerchantReport(dtuPayMerchant.getId());
     }
 
