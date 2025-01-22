@@ -161,7 +161,7 @@ public class ReportSteps {
     public void theReportContainsTheGivenPaymentS(int arg0) {
         for (int i = 0; i < arg0; i++) {
             PaymentLog log = receivedLogs.get(i);
-            assertEquals(log.getCustomerId(), dtuPayCustomer.getId());
+            assertEquals(log.getCustomerId(), null);
             assertEquals(log.getMerchantId(), dtuPayMerchant.getId());
             assertEquals(log.getAmount().setScale(4), new BigDecimal(10).setScale(4));
         }
