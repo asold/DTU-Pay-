@@ -18,22 +18,3 @@ Feature: Reporting
     When the manager requests for a report
     Then A report with all payment(s) is generated successfully
     And the report contains at least given 3 payment(s)
-
-  #    To implement this Scenario correctly ReportService must publish events to AccountManager to check
-  #    if MerchantID is valid. ReportService does not know if MerchantID is in the system, only that
-  #    no payment with merchant ID was made. Or redefine scenario.
-  #    ReportService Should not keep this information If MerchantID is still valid Account.
-
-#  Scenario: Report generation fails when initiated by an invalid merchant
-#    Given a merchant not registered in DTUPay
-#    When the merchant requests a report
-#    Then report is not returned
-#    And the error message "Invalid merchant" is returned
-
-  #    To implement this Scenario correctly ReportService must publish events to AccountManager..As above scenario.
-
-#  Scenario: Report generation fails when initiated by an invalid merchant
-#    Given a customer not registered in DTUPay
-#    When the customer requests a report
-#    Then report is not returned
-#    And the error message "Invalid customer" is returned
