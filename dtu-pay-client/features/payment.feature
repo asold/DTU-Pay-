@@ -13,7 +13,7 @@ Feature: Payment
     Then the payment is successful
     And the balance of the customer at the bank is 990 kr
     And the balance of the merchant at the bank is 1010 kr
-#    And the customer's token is no longer valid
+    And the customer's token is no longer valid
 
   Scenario: Payment fails due to insufficient funds
     Given a customer with name "Susan", last name "Baldwin", and CPR "250103-7220"
