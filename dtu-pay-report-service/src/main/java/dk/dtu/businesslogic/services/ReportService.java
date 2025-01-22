@@ -48,6 +48,8 @@ public class ReportService {
 		pendingPaymentLog.setMerchantId(merchantId);
 		pendingPaymentLog.setAmount(amount);
 		pendingPaymentLog.setTokenId(tokenId);
+		storePaymentLogIfCompleted(correlationId);
+
 	}
 
 	public void retrievedCustomerId(Event event) {
@@ -55,6 +57,8 @@ public class ReportService {
 		String customerId = event.getArgument(1, String.class);
 		var pendingPaymentLog = pendingPaymentLogs.computeIfAbsent(correlationId, c -> new PaymentLog());
 		pendingPaymentLog.setCustomerId(customerId);
+		storePaymentLogIfCompleted(correlationId);
+
 	}
 
 	public void retrievedPaymentSuccessful(Event event) {
