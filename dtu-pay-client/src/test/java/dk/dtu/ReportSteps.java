@@ -47,7 +47,6 @@ public class ReportSteps {
     private List<PaymentLog> receivedLogs;
     private String merchantCpr;
 
-
     @Before("@Report")
     public void beforeTests() throws Exception {
         try {
@@ -138,6 +137,9 @@ public class ReportSteps {
 
     }
 
+    /**
+     * @author Karrar Adam s230432,
+     */
     @Given("{int} payment between a customer and a merchant")
     public void paymentBetweenACustomerAndAMerchant(int numberOfPaymentsToMake) throws BankServiceException_Exception, Exception {
 
@@ -172,12 +174,17 @@ public class ReportSteps {
         }
 
    }
+    /**
+     * @author Jeppe Jensen 233488
+     */
    //Scenario: Successful merchant report generation
     @When("the merchant requests for a report")
     public void theMerchantRequestsForAReport() throws InterruptedException {
         receivedLogs = reportAdapter.getMerchantReport(dtuPayMerchant.getId());
     }
-
+    /**
+     * @author Jeppe Jensen 233488
+     */
     // Scenario: Successful manager report generation
     @When("the manager requests for a report")
     public void theManagerRequestsForAReport() {
