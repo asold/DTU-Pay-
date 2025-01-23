@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 
 @Singleton
 public class MerchantFacade {
+
     private final Map<CorrelationId, CompletableFuture<String>> merchantRequests = new ConcurrentHashMap<>();
 
     MessageQueue queue;
@@ -66,5 +67,9 @@ public class MerchantFacade {
         merchantRequests.put(correlationId, new CompletableFuture<>());
         queue.publish(new Event("MerchantAccountDeregistrationRequested", correlationId, merchantId));
         return merchantRequests.get(correlationId).get();
+    }
+
+    public Map<CorrelationId, CompletableFuture<String>> getFutures() {
+        return this.merchantRequests;
     }
 }

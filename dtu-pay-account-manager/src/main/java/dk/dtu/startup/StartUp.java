@@ -26,7 +26,7 @@ public class StartUp {
 		new AccountService(new RabbitMqQueue("rabbitMq"));
 
 		// Keep the main thread alive to prevent shutdown
-		System.out.println("Account Manager is running. Press Ctrl+C to stop.");
+		logger.info("Account Manager is running. Press Ctrl+C to stop.");
 		synchronized (this) {
 			wait(); // Keeps the main thread alive indefinitely
 		}

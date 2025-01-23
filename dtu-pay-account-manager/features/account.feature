@@ -1,3 +1,5 @@
+
+#@author Mihaly Tass (s243573)
 Feature: Account
 
   Scenario: Successful customer registration

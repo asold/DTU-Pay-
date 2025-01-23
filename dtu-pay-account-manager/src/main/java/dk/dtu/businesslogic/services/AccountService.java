@@ -15,7 +15,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * @author  Andrei Soldan 243873
+ * @author Mihaly Tass (s243573)
  */
 public class AccountService {
 

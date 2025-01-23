@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 public class CustomerResource {
 
     @Inject
-    private CustomerFacade customerFacade;
+    CustomerFacade customerFacade;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -33,7 +33,6 @@ public class CustomerResource {
     @APIResponse(responseCode = "400", description = "Error registering the customer due to invalid input values", content = @Content(schema = @Schema(type = SchemaType.STRING)))
     @APIResponse(responseCode = "500", description = "Unknown error while registering the merchant", content = @Content(schema = @Schema(type = SchemaType.STRING)))
     public Response registerCustomer(RegisterCustomerRequest customer) {
-
         try {
             String customerId = customerFacade.registerCustomer(customer);
             return Response.created(new URI("/customers/" + customerId)).entity(customerId).build();
@@ -49,13 +48,7 @@ public class CustomerResource {
     @APIResponse(responseCode = "200", description = "Customer Deregistered Successfully", content = @Content(schema = @Schema(type = SchemaType.STRING)))
     @APIResponse(responseCode = "500", description = "Unknown error deregistering the customer", content = @Content(schema = @Schema(type = SchemaType.STRING)))
     public Response deregisterCustomer(@PathParam("id") String id) throws URISyntaxException, ExecutionException, InterruptedException {
-
         String customerId = customerFacade.deregisterCustomer(id);
         return Response.created(new URI("/customers/" + customerId)).entity(customerId).build();
     }
-
-
-
-
-
 }

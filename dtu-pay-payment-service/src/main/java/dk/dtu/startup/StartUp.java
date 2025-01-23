@@ -8,7 +8,14 @@ import messaging.implementations.RabbitMqQueue;
  * @author  Andrei Soldan 243873
  */
 public class StartUp {
+
+
 	public static void main(String[] args) throws Exception {
+
+		Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+			throwable.printStackTrace();
+		});
+
 		new StartUp().startUp();
 	}
 

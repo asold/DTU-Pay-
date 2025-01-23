@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 public class ReportResource {
 
     @Inject
-    private ReportFacade reportFacade;
+    ReportFacade reportFacade;
 
     @GET
     @Path("customer/{id}")

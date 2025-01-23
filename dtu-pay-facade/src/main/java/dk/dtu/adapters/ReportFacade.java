@@ -17,10 +17,12 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+
+
 @Singleton
 public class ReportFacade {
 
-        private Map<CorrelationId, CompletableFuture<List<PaymentLog>>> reportRequests = new ConcurrentHashMap<>();
+        private final Map<CorrelationId, CompletableFuture<List<PaymentLog>>> reportRequests = new ConcurrentHashMap<>();
 
         private final MessageQueue queue;
 
@@ -28,7 +30,7 @@ public class ReportFacade {
             this(new RabbitMqQueue("rabbitMq"));
         }
 
-        public ReportFacade(RabbitMqQueue q) {
+        public ReportFacade(MessageQueue q) {
             queue = q;
             q.addHandler("ReportGenerated", this::policyReportGenerated);
         }
@@ -43,11 +45,11 @@ public class ReportFacade {
             reportRequests.remove(correlationId);
         }
 
-            public List<PaymentLog> getCustomerPaymentLogs(String id) throws ExecutionException, InterruptedException {
+        public List<PaymentLog> getCustomerPaymentLogs(String id) throws ExecutionException, InterruptedException {
             CorrelationId correlationId = new CorrelationId();
             CompletableFuture<List<PaymentLog>> paymentLogs = new CompletableFuture<>();
             reportRequests.put(correlationId, paymentLogs);
-            queue.publish(new Event("CustomerReportRequested",correlationId, id ));
+            queue.publish(new Event("CustomerReportRequested", correlationId, id));
             return paymentLogs.get();
         }
 
@@ -55,7 +57,7 @@ public class ReportFacade {
             CorrelationId correlationId = new CorrelationId();
             CompletableFuture<List<PaymentLog>> paymentLogs = new CompletableFuture<>();
             reportRequests.put(correlationId, paymentLogs);
-            queue.publish(new Event("MerchantReportRequested",correlationId, id ));
+            queue.publish(new Event("MerchantReportRequested", correlationId, id));
             return paymentLogs.get();
         }
 
@@ -63,9 +65,12 @@ public class ReportFacade {
             CorrelationId correlationId = new CorrelationId();
             CompletableFuture<List<PaymentLog>> paymentLogs = new CompletableFuture<>();
             reportRequests.put(correlationId, paymentLogs);
-            queue.publish(new Event("ManagerReportRequested",correlationId));
+            queue.publish(new Event("ManagerReportRequested", correlationId));
             return paymentLogs.get();
         }
 
+        public Map<CorrelationId, CompletableFuture<List<PaymentLog>>> getReportRequests() {
+            return reportRequests;
+        }
 }
 

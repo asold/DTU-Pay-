@@ -3,6 +3,8 @@ package dk.dtu;
 import dk.dtu.adapters.MerchantFacade;
 import dk.dtu.core.exceptions.AccountRegistrationException;
 import dk.dtu.core.models.RegisterMerchantRequest;
+import dk.dtu.core.models.Customer;
+import dk.dtu.core.models.Merchant;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -22,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 public class MerchantResource {
 
     @Inject
-    private MerchantFacade merchantFacade;
+    MerchantFacade merchantFacade;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -47,7 +49,6 @@ public class MerchantResource {
     @APIResponse(responseCode = "200", description = "Merchant Deregistered Successfully", content = @Content(schema = @Schema(type = SchemaType.STRING)))
     @APIResponse(responseCode = "500", description = "Unknown error while deregistering the merchant", content = @Content(schema = @Schema(type = SchemaType.STRING)))
     public Response deregisterCustomer(@PathParam("id") String id) throws URISyntaxException, ExecutionException, InterruptedException {
-
         String merchantId = merchantFacade.deregisterMerchant(id);
         return Response.created(new URI("/merchants/" + merchantId)).entity(merchantId).build();
     }

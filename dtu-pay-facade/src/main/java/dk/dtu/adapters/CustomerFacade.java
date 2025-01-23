@@ -13,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
+
 /**
  * @author Andrei Soldan s243873
  */
@@ -21,10 +22,11 @@ public class CustomerFacade {
 
     private final Map<CorrelationId, CompletableFuture<String>> customerRequests = new ConcurrentHashMap<>();
 
-    MessageQueue queue;
+    private MessageQueue queue;
 
     public CustomerFacade() {
         this(new RabbitMqQueue("rabbitMq"));
+        System.out.println("CustomerFacade created with default ctor");
     }
 
     public CustomerFacade(MessageQueue q) {
@@ -42,7 +44,7 @@ public class CustomerFacade {
         customerRequests.remove(correlationId);
     }
 
-    private void policyCustomerRegistrationFailed(Event e) {
+    public void policyCustomerRegistrationFailed(Event e) {
         CorrelationId correlationId = e.getArgument(0, CorrelationId.class);
         String error = e.getArgument(1, String.class);
         System.out.println("Policy customer registration failed: " + error);
@@ -74,5 +76,9 @@ public class CustomerFacade {
         customerRequests.put(correlationId, deregisterCustomerRequest);
         queue.publish(new Event("CustomerAccountDeregistrationRequested", correlationId, customerId));
         return deregisterCustomerRequest.get();
+    }
+
+    public Map<CorrelationId, CompletableFuture<String>> getFutures() {
+        return this.customerRequests;
     }
 }

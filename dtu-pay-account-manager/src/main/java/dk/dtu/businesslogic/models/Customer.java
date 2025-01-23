@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * Represents a customer entity used throughout the client app.
  *
- * @author Andrei Soldan s243873
+ * @author Mihaly Tass (s243573)
  */
 @Entity
 public final class Customer {

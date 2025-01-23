@@ -32,7 +32,7 @@ public class TokenFacade {
         this(new RabbitMqQueue("rabbitMq"));
     }
 
-    public TokenFacade(RabbitMqQueue q) {
+    public TokenFacade(MessageQueue q) {
         queue = q;
         q.addHandler("TokensGenerated", this::policyTokensGenerated);
         q.addHandler("TokensGeneratedFailed", this::policyTokensGeneratedFailed);
@@ -73,5 +73,9 @@ public class TokenFacade {
                 throw e;
             }
         }
+    }
+
+    public Map<CorrelationId, CompletableFuture<List<TokenResult>>> getTokenRequests() {
+        return tokenRequests;
     }
 }

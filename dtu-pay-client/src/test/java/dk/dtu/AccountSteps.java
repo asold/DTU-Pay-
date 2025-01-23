@@ -184,12 +184,12 @@ public class AccountSteps {
     @Before("@Account")
     public void beforeTests() {
         System.out.println("Clean up");
-        try{
+        try {
             Account emptyCprAccount = bankService.getAccountByCprNumber("testCprNumber");
             if (emptyCprAccount != null) {
                 bankService.retireAccount(emptyCprAccount.getId());
             }
-        }catch(BankServiceException_Exception e) {
+        } catch(BankServiceException_Exception e) {
             System.err.println(e.getMessage());
         }
         try {
@@ -197,10 +197,10 @@ public class AccountSteps {
             if (customerAccount != null) {
                 bankService.retireAccount(customerAccount.getId());
             }
-        }catch(BankServiceException_Exception e) {
+        } catch(BankServiceException_Exception e) {
             System.err.println(e.getMessage());
         }
-        try{
+        try {
             Account merchantAccount = bankService.getAccountByCprNumber("241902-7253");
             if (merchantAccount != null) {
                 bankService.retireAccount(merchantAccount.getId());
@@ -230,6 +230,5 @@ public class AccountSteps {
         if (dtuPayMerchant != null && dtuPayMerchant.getId() != null) {
             merchantAdapter.deregister(dtuPayMerchant.getId());
         }
-
     }
 }

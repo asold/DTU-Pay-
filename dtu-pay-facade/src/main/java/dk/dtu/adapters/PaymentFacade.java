@@ -114,5 +114,4 @@ public class PaymentFacade {
     public Map<CorrelationId, CompletableFuture<PaymentResponse>> getPaymentRequests() {
         return paymentRequests;
     }
-
 }
