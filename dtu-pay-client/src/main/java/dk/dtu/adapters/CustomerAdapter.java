@@ -44,7 +44,7 @@ public final class CustomerAdapter {
     }
 
     public List<TokenResult> getTokens(String id, int amount) throws Exception {
-        Response response = client.target("http://localhost:8082/tokens/" + id)
+        Response response = client.target("http://localhost:8082/tokens/customer/" + id)
                 .queryParam("amount", amount)
                 .request(MediaType.APPLICATION_JSON)
                 .get();

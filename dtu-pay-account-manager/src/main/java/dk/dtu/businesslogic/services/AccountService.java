@@ -1,14 +1,17 @@
 package dk.dtu.businesslogic.services;
 
-import dk.dtu.businesslogic.repositories.AccountRepository;
 import dk.dtu.businesslogic.models.Customer;
 import dk.dtu.businesslogic.models.Merchant;
+import dk.dtu.businesslogic.models.RegisterCustomerRequest;
+import dk.dtu.businesslogic.models.RegisterMerchantRequest;
+import dk.dtu.businesslogic.repositories.AccountRepository;
 import messaging.CorrelationId;
 import messaging.Event;
 import messaging.MessageQueue;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -42,8 +45,8 @@ public class AccountService {
 	 */
 	public void policyCustomerRegistrationRequested(Event event) {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
-		var customer = event.getArgument(1, Customer.class);
-		String customerCheck = checkEntity(customer.getFirstName(), customer.getLastName(), customer.getCpr(), customer.getBankAccountNumber());
+		var customer = event.getArgument(1, RegisterCustomerRequest.class);
+		String customerCheck = checkEntity(customer.firstName(), customer.lastName(), customer.cpr(), customer.bankAccountNumber());
 		if (!"OK".equals(customerCheck)) {
 			queue.publish(new Event("CustomerRegistrationFailed", correlationId, customerCheck));
 			return;
@@ -58,8 +61,8 @@ public class AccountService {
 	 */
 	public void policyMerchantRegistrationRequested(Event event) {
 		CorrelationId correlationId = event.getArgument(0, CorrelationId.class);
-		var merchant = event.getArgument(1, Merchant.class);
-		String merchantCheck = checkEntity(merchant.getFirstName(), merchant.getLastName(), merchant.getCpr(), merchant.getBankAccountNumber());
+		var merchant = event.getArgument(1, RegisterMerchantRequest.class);
+		String merchantCheck = checkEntity(merchant.firstName(), merchant.lastName(), merchant.cpr(), merchant.bankAccountNumber());
 		if (!"OK".equals(merchantCheck)) {
 			queue.publish(new Event("MerchantRegistrationFailed", correlationId, merchantCheck));
 			return;
@@ -132,11 +135,16 @@ public class AccountService {
 
 	/**
 	 * Store the given customer with a new ID and publish a 'CustomerRegistered' event
-	 * @param customer the customer
+	 * @param customerDTO the customerDTO
 	 */
-	public String createCustomerAccount(Customer customer) {
+	public String createCustomerAccount(RegisterCustomerRequest customerDTO) {
 		String cid = UUID.randomUUID().toString();
+		Customer customer = new Customer();
 		customer.setId(cid);
+		customer.setFirstName(customerDTO.firstName());
+		customer.setLastName(customerDTO.lastName());
+		customer.setCpr(customerDTO.cpr());
+		customer.setBankAccountNumber(customerDTO.bankAccountNumber());
 		accountRepository.addCustomer(customer);
 		return cid;
 	}
@@ -144,11 +152,16 @@ public class AccountService {
 
 	/**
 	 * Store the given merchant with a new ID and publish a 'MerchantRegistered' event
-	 * @param merchant the merchant
+	 * @param merchantDTO the merchantDTO
 	 */
-	public String createMerchantAccount(Merchant merchant) {
+	public String createMerchantAccount(RegisterMerchantRequest merchantDTO) {
 		String mid = UUID.randomUUID().toString();
+		Merchant merchant = new Merchant();
 		merchant.setId(mid);
+		merchant.setFirstName(merchantDTO.firstName());
+		merchant.setLastName(merchantDTO.lastName());
+		merchant.setCpr(merchantDTO.cpr());
+		merchant.setBankAccountNumber(merchantDTO.bankAccountNumber());
 		accountRepository.addMerchant(merchant);
 		return mid;
 	}

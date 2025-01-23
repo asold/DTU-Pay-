@@ -1,7 +1,7 @@
 package dk.dtu.adapters;
 
 import dk.dtu.core.exceptions.AccountRegistrationException;
-import dk.dtu.core.models.Customer;
+import dk.dtu.core.models.RegisterCustomerRequest;
 import jakarta.inject.Singleton;
 import messaging.CorrelationId;
 import messaging.Event;
@@ -60,7 +60,7 @@ public class CustomerFacade {
         customerRequests.remove(correlationId);
     }
 
-    public String registerCustomer(Customer customer) throws InterruptedException, ExecutionException, AccountRegistrationException {
+    public String registerCustomer(RegisterCustomerRequest customer) throws InterruptedException, ExecutionException, AccountRegistrationException {
         CorrelationId correlationId = new CorrelationId();
         CompletableFuture<String> registerCustomerRequest = new CompletableFuture<>();
         customerRequests.put(correlationId, registerCustomerRequest);

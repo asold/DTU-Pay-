@@ -1,10 +1,8 @@
 package dk.dtu;
 
-import dk.dtu.adapters.CustomerFacade;
 import dk.dtu.adapters.MerchantFacade;
 import dk.dtu.core.exceptions.AccountRegistrationException;
-import dk.dtu.core.models.Customer;
-import dk.dtu.core.models.Merchant;
+import dk.dtu.core.models.RegisterMerchantRequest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -24,7 +22,7 @@ public class MerchantResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response registerCustomer(Merchant merchant) {
+    public Response registerCustomer(RegisterMerchantRequest merchant) {
 
         try {
             String merchantId = merchantFacade.registerMerchant(merchant);

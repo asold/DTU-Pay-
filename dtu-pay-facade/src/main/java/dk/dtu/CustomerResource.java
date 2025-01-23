@@ -2,11 +2,12 @@ package dk.dtu;
 
 import dk.dtu.adapters.CustomerFacade;
 import dk.dtu.core.exceptions.AccountRegistrationException;
-import dk.dtu.core.models.Customer;
+import dk.dtu.core.models.RegisterCustomerRequest;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.ExecutionException;
@@ -24,7 +25,7 @@ public class CustomerResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response registerCustomer(Customer customer) {
+    public Response registerCustomer(RegisterCustomerRequest customer) {
 
         try {
             String customerId = customerFacade.registerCustomer(customer);

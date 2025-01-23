@@ -1,7 +1,7 @@
 package dk.dtu.adapters;
 
 import dk.dtu.core.exceptions.AccountRegistrationException;
-import dk.dtu.core.models.Merchant;
+import dk.dtu.core.models.RegisterMerchantRequest;
 import jakarta.inject.Singleton;
 import messaging.CorrelationId;
 import messaging.Event;
@@ -54,7 +54,7 @@ public class MerchantFacade {
         merchantRequests.remove(correlationId);
     }
 
-    public String registerMerchant(Merchant merchant) throws InterruptedException, ExecutionException, AccountRegistrationException {
+    public String registerMerchant(RegisterMerchantRequest merchant) throws InterruptedException, ExecutionException, AccountRegistrationException {
         CorrelationId correlationId = new CorrelationId();
         merchantRequests.put(correlationId, new CompletableFuture<>());
         queue.publish(new Event("MerchantAccountRegistrationRequested", correlationId, merchant));
