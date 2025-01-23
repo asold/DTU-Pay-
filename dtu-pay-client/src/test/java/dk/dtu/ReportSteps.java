@@ -12,8 +12,6 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.junit.Assert;
-
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -129,6 +127,13 @@ public class ReportSteps {
             }
         } catch (BankServiceException_Exception e) {
             System.err.println(e.getMessage());
+        }
+
+        if (dtuPayCustomer != null && dtuPayCustomer.getId() != null) {
+            customerAdapter.deregister(dtuPayCustomer.getId());
+        }
+        if (dtuPayMerchant != null && dtuPayMerchant.getId() != null) {
+            merchantAdapter.deregister(dtuPayMerchant.getId());
         }
 
     }

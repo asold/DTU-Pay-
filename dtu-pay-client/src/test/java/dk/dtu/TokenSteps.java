@@ -96,5 +96,11 @@ public class TokenSteps {
         } catch (BankServiceException_Exception e) {
             throw new RuntimeException(e);
         }
+
+        //Deregister user from DTU Pay
+        if (dtuPayCustomer != null && dtuPayCustomer.getId() != null) {
+            customerAdapter.deregister(dtuPayCustomer.getId());
+        }
+
     }
 }

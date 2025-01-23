@@ -1,6 +1,5 @@
 package dk.dtu;
 
-import dk.dtu.core.models.*;
 import dk.dtu.adapters.CustomerAdapter;
 import dk.dtu.adapters.MerchantAdapter;
 import dk.dtu.adapters.PaymentAdapter;
@@ -224,6 +223,13 @@ public class PaymentSteps {
             }
         } catch (BankServiceException_Exception e) {
             throw new RuntimeException(e);
+        }
+
+        if (dtuPayCustomer != null && dtuPayCustomer.getId() != null) {
+            customerAdapter.deregister(dtuPayCustomer.getId());
+        }
+        if (dtuPayMerchant != null && dtuPayMerchant.getId() != null) {
+            merchantAdapter.deregister(dtuPayMerchant.getId());
         }
 
     }
