@@ -58,6 +58,7 @@ Feature: Payment
     Then an error message "DebtorAccountNotFound" is returned
     And the balance of the merchant at the bank is 1000 kr
 
+#@author Maxim Zavidei (s240394)
   Scenario: Payment fails with non existent merchant bank account
     Given a customer with name "Susan", last name "Baldwin", and CPR "250103-7220"
     And the customer is registered with the bank with an initial balance of 1000 kr
@@ -70,7 +71,7 @@ Feature: Payment
     Then an error message "CreditorAccountNotFound" is returned
     And the balance of the customer at the bank is 1000 kr
 
-
+#@author Maxim Zavidei (s240394)
   Scenario: Payment fails with a negative amount
     Given a customer with name "Susan", last name "Baldwin", and CPR "250103-7220"
     And the customer is registered with the bank with an initial balance of 1000 kr
@@ -84,6 +85,7 @@ Feature: Payment
     And the balance of the customer at the bank is 1000 kr
     And the balance of the merchant at the bank is 1000 kr
 
+#@author Maxim Zavidei (s240394)
   Scenario: Payment fails when initiated by a unregistered merchant
     Given a customer with name "Susan", last name "Baldwin", and CPR "250103-7220"
     And the customer is registered with the bank with an initial balance of 1000 kr
