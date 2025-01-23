@@ -13,6 +13,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 
 import java.util.concurrent.ExecutionException;
 /**
@@ -28,6 +32,11 @@ public class PaymentResource {
 
 
     @POST
+    @APIResponse(responseCode = "200", description = "Payment Processed Successfully", content = @Content(schema = @Schema(implementation = PaymentResponse.class)))
+    @APIResponse(responseCode = "401", description = "Invalid Token", content = @Content(schema = @Schema(type = SchemaType.STRING)))
+    @APIResponse(responseCode = "400", description = "Invalid Payment: Customer and/or Merchant Bank accounts invalid and/or Payment with Negative Amount", content = @Content(schema = @Schema(type = SchemaType.STRING)))
+    @APIResponse(responseCode = "404", description = "Merchant not found", content = @Content(schema = @Schema(type = SchemaType.STRING)))
+    @APIResponse(responseCode = "500", description = "Unknown error while processing the payment", content = @Content(schema = @Schema(type = SchemaType.STRING)))
     public Response requestPayment(Payment payment) throws ExecutionException, InterruptedException {
         try {
             PaymentResponse response = paymentFacade.requestPayment(payment);

@@ -8,13 +8,16 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
  * RESTful resource for managing customer tokens.
- *
  * This class provides an endpoint to retrieve tokens for a specific customer.
  * It uses dependency injection to interact with the token business logic.
  * @author Maxim Zavidei
@@ -43,6 +46,9 @@ public class TokenResource {
      */
     @GET
     @Path("/customer/{id}")
+    @APIResponse(responseCode = "200", description = "Tokens Retrieved Successfully", content = @Content(schema = @Schema(type = SchemaType.ARRAY, implementation = TokenResult.class)))
+    @APIResponse(responseCode = "400", description = "The number of tokens requested is not between 1 and 5 or Invalid Customer Account or The number of tokens requested exceeds customer limit ", content = @Content(schema = @Schema(type = SchemaType.STRING)))
+    @APIResponse(responseCode = "500", description = "Unknown error while retrieving the tokens", content = @Content(schema = @Schema(type = SchemaType.STRING)))
     public Response getTokens(
             @PathParam("id") String customerId,
             @QueryParam("amount") @NotNull(message = "The amount is required") int amount)
