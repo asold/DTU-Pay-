@@ -13,9 +13,9 @@ public class ReportAdapter {
 
     private final Client client = ClientBuilder.newBuilder().build();
 
-    /** Author Karrar Adam s230432
+    /**
+     * @author Karrar Adam s230432
      */
-
     public List<PaymentLog> getCustomerReport(String id) {
         Response response = client.target("http://localhost:8082/reports/customer/" + id)
                 .request(MediaType.APPLICATION_JSON)

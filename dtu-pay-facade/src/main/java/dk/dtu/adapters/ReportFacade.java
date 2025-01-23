@@ -1,9 +1,9 @@
 package dk.dtu.adapters;
 
-/*
- * @author Karrar Adam s230432
- */
 
+/**
+ * @author Jeppe Jensen 233488
+ */
 import dk.dtu.core.models.PaymentLog;
 import com.google.gson.reflect.TypeToken;
 import jakarta.inject.Singleton;

@@ -10,6 +10,10 @@ import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * @author Karrar Adam s230432
+ */
+
 @Path("/reports")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
