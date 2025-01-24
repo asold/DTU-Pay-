@@ -1,13 +1,13 @@
 package dk.dtu.businesslogic.services;
 
+import dk.dtu.businesslogic.exceptions.IllegalNumberOfRequestedTokensException;
+import dk.dtu.businesslogic.exceptions.InvalidCustomerAccountException;
+import dk.dtu.businesslogic.exceptions.InvalidTokenException;
 import dk.dtu.businesslogic.models.Token;
 import dk.dtu.businesslogic.models.TokenResult;
 import dk.dtu.businesslogic.models.TokensRequestPolicy;
 import dk.dtu.businesslogic.repositories.TokenRepository;
 import dk.dtu.businesslogic.repositories.exceptions.TokenNotFoundException;
-import dk.dtu.businesslogic.exceptions.IllegalNumberOfRequestedTokensException;
-import dk.dtu.businesslogic.exceptions.InvalidCustomerAccountException;
-import dk.dtu.businesslogic.exceptions.InvalidTokenException;
 import messaging.CorrelationId;
 import messaging.Event;
 import messaging.MessageQueue;
@@ -192,17 +192,13 @@ public class TokenService {
 
         var listTokens = tokenRepository.getUnusedTokensByCustomerId(customerId);
         if (amount >= 1 && amount <= 5) {
-            if (listTokens.isEmpty()) {
-                generateTokens(customerId, amount);
-                var result = tokenRepository.getUnusedTokensByCustomerId(customerId);
-                return result.stream().map(token -> new TokenResult(token.getTokenId())).toList();
-            } else if (amount + listTokens.size() <= 6) {
-                generateTokens(customerId, amount);
-                var result = tokenRepository.getUnusedTokensByCustomerId(customerId);
-                return result.stream().map(token -> new TokenResult(token.getTokenId())).toList();
-            } else {
+            if (listTokens.size() > 1) {
                 throw new IllegalNumberOfRequestedTokensException(
-                        "The number of requested tokens exceeds the limit of allowed tokens per customer");
+                        "Customer can only request tokens when have 0 or 1 token left");
+
+            } else {
+                var result = generateTokens(customerId, amount);
+                return result.stream().map(token -> new TokenResult(token.getTokenId())).toList();
             }
         } else {
             throw new IllegalNumberOfRequestedTokensException(

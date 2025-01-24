@@ -13,12 +13,12 @@ Feature: Token Generation
     And the customer requests 5 tokens
     Then 6 tokens are generated for the customer
 
-  Scenario: Unsuccessful token generation with more then 6 tokens
+  Scenario: Unsuccessful token when customer already has more than 1 token
     Given a customer of DTU pay
-    When the customer requests 3 tokens
-    Then 3 tokens are generated for the customer
+    When the customer requests 2 tokens
+    Then 2 tokens are generated for the customer
     When the customer requests 4 tokens
-    Then the customer receives the error message "The number of requested tokens exceeds the limit of allowed tokens per customer"
+    Then the customer receives the error message "Customer can only request tokens when have 0 or 1 token left"
 
   Scenario: Unsuccessful token generation when requesting 0 tokens
     Given a customer of DTU pay

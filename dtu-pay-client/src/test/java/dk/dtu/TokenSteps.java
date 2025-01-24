@@ -48,7 +48,7 @@ public class TokenSteps {
     @When("the customer requests {int} tokens")
     public void theCustomerRequestsTokens(int tokenAmount) {
         try {
-            dtuPayCustomer.setTokens(customerAdapter.getTokens(dtuPayCustomer.getId(), tokenAmount));
+            dtuPayCustomer.addTokens(customerAdapter.getTokens(dtuPayCustomer.getId(), tokenAmount));
         } catch (Exception e) {
             errorMessageReturned = e.getMessage();
         }

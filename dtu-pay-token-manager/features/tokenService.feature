@@ -19,7 +19,7 @@ Feature: Token Service
     And a "CustomerAccountValidated" event with isValidAccount true is sent
     Then the "TokensGeneratedFailed" event is published
 
-  Scenario: Unsuccessful token generation due to maximum number of tokens reached
+  Scenario: Unsuccessful token generation due to customer already has more than 1 token
     Given a customer with 4 tokens
     When a "TokensRequested" event with amount 4 is published
     And a "CustomerAccountValidated" event with isValidAccount true is sent

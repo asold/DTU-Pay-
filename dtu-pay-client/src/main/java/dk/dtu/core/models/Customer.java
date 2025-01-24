@@ -4,6 +4,7 @@ import dtu.ws.fastmoney.User;
 import org.jmolecules.ddd.annotation.Entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,6 +45,11 @@ public final class Customer {
 
     public void setTokens(List<TokenResult> tokens) {
         this.tokens = tokens;
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    public boolean addTokens(Collection<TokenResult> tokens) {
+        return this.tokens.addAll(tokens);
     }
 
     public String getCpr() {
